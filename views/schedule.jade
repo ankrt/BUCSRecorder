@@ -1,8 +1,12 @@
 extends layout
 
 block content
-   h1= title
+   .container
+      h3= title
 
-   p here you can schedule a recording to occur
-
-a(href="/") Home
+      div(class='container-fluid')
+         div(class='row', id='scheduleFormList')
+         //button(class='btn btn-default', id='addScheduleForm', onclick='rec.insertScheduleForm()') Add Another
+   script(src='//rawgit.com/Eonasdan/bootstrap-datetimepicker/master/src/js/bootstrap-datetimepicker.js')
+   script(src='/javascripts/scheduleSetup.js')
+   link(rel='stylesheet', href='//rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/css/bootstrap-datetimepicker.min.css')

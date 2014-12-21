@@ -33,7 +33,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-// use routing
+// use routing - basically one line for each page in the app
 app.use('/', routes);
 app.use('/schedule', schedule);
 app.use('/archive', archive);

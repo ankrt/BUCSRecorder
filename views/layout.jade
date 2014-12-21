@@ -1,7 +1,23 @@
 doctype html
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
+   head
+      title= title
+      script(src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js")
+      script(src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")
+      script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js')
+      script(src="/javascripts/global.js")
+      link(href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css", rel="stylesheet")
+      link(rel='stylesheet', href='/stylesheets/style.css')
+   body
+      .container
+         .header
+            nav
+               ul(class="nav nav-pills pull-right")
+                  li(class=title=='Home'?'active':undefined)
+                     a(href="/") Home
+                  li(class=title=='Archive'?'active':undefined)
+                     a(href="/archive") Archive
+                  li(class=title=='Schedule'?'active':undefined)
+                     a(href="/schedule") Schedule
+            h2.text-muted BUCSRecorder
     block content
