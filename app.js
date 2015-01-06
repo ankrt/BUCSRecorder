@@ -4,9 +4,11 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-// database
 var mongo = require('mongoskin');
 var db = mongo.db("mongodb://localhost:27017/recorder", {native_parser:true});
+// homemade modules
+var Logic = require('./logic');
+
 
 // routing for the app
 var routes = require('./routes/index');
@@ -14,6 +16,7 @@ var schedule = require('./routes/schedule');
 var archive = require('./routes/archive');
 
 var app = express();
+var logic = new Logic();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,9 +30,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// make database accessible to router
+// make some objects accessible to router
 app.use(function(req, res, next) {
     req.db = db;
+    req.logic = logic;
     next();
 });
 
@@ -68,6 +72,5 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
-
 
 module.exports = app;

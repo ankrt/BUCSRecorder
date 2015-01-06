@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
+
 /*
  * GET schedule
  */
@@ -23,8 +24,10 @@ router.get('/stationList', function(req, res) {
  */
 router.post('/submit', function(req, res) {
     var db = req.db;
+    var logic = req.logic;
     db.collection('schedule').insert(req.body, function(err, result) {
         res.send((err === null) ? {msg: ''} : {msg: err});
+        logic.notify();
     });
 });
 

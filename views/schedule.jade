@@ -1,12 +1,42 @@
 extends layout
 
 block content
-   .container
-      h3= title
+    .container
+        h3= title
 
-      div(class='container-fluid')
-         div(class='row', id='scheduleFormList')
-         //button(class='btn btn-default', id='addScheduleForm', onclick='rec.insertScheduleForm()') Add Another
-   script(src='//rawgit.com/Eonasdan/bootstrap-datetimepicker/master/src/js/bootstrap-datetimepicker.js')
-   script(src='/javascripts/scheduleSetup.js')
-   link(rel='stylesheet', href='//rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/css/bootstrap-datetimepicker.min.css')
+        .container-fluid
+            .row#form-list
+                //-first form
+                form.form#form-0
+                    .panel.panel-default
+                        .panel-body
+                            .col-sm-6
+                                .form-group.station
+                                    label(for='station') Station
+                                    select.form-control
+                                        //-select items populated by javascript
+                                .form-group.datetime
+                                    label(for='start') Start date/time
+                                    .input-group.date
+                                        input.form-control(type='text', data-date-format='DD/MM/YYYY HH:mm', placeholder='dd/mm/yyyy hh:mm')
+                                        span.input-group-addon
+                                            span.glyphicon-calendar.glyphicon
+                                .form-group.duration
+                                    label(for='duration') Duration (mins)
+                                    select.form-control
+                                        //-select items populated by javascript
+                            //-end column
+                            .col-sm-6
+                                .form-group.description
+                                    label(for='description') Description
+                                    input.form-control
+                                .form-group.form-actions
+                            //-end column
+            .btn-toolbar.actions
+                button.btn.btn-primary.pull-right#submit Submit
+                button.btn.btn-default.pull-right.add.disabled(onclick='rec.addForm()') Add
+
+
+    script(src='//rawgit.com/Eonasdan/bootstrap-datetimepicker/master/src/js/bootstrap-datetimepicker.js')
+    script(src='/javascripts/scheduleSetup.js')
+    link(rel='stylesheet', href='//rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/css/bootstrap-datetimepicker.min.css')
