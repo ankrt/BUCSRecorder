@@ -1,17 +1,19 @@
 var Recorder = require('./recorder');
+var fs = require('fs');
 var moment = require('moment');
 var mongo = require('mongoskin');
 var db = mongo.db("mongodb://localhost:27017/recorder", {native_parser:true});
+var probe = require('node-ffprobe');
 
 // constructor
 function Logic() {
 }
 
-
-
 start();
 
 function start() {
+
+    // start tailable cursor on schedule collection
     db.collection('schedule', function(err, collection) {
 
         var cursorOptions = {
@@ -19,36 +21,34 @@ function start() {
             awaitdata: true,
             numberOfRetries: -1
         };
-        console.log(cursorOptions);
 
         var stream = collection.find({}, cursorOptions).sort( {$natural: 1} ).stream();
 
-        stream.on('data', function(doc) {
-            activateSchedule(doc);
+        stream.on('data', function(schedule) {
+            activate(schedule);
         });
     });
 }
 
-function activateSchedule(sch) {
-    if (isExpired(sch)) {
-        console.log('Schedule with ID: ' + sch._id + ' has expired and will not be activated');
-    } else {
-        console.log('Schedule with ID: ' + sch._id + ' will be made active');
-        // get the station information
-        var station = sch.station;
-        var duration = sch.duration;
-        var startTime = sch.start;
-        db.collection('stations').findById(station, function(err, item) {
-            var streams = item.streams;
-            var rec = new Recorder(streams, startTime, duration);
-            rec.activate();
+function activate(schedule) {
+    if (!expired(schedule)) {
+        console.log('Schedule with ID: ' + schedule._id + ' will be made active');
+
+        db.collection('stations').findById(schedule.station, function(err, station) {
+            var rec = new Recorder(station, schedule);
+            rec.activate(function() {
+                updateDatabase(rec.recording);
+            });
         });
     }
 }
 
-function isExpired(sch) {
+/*
+ * Check whether a schedule is expired
+ */
+function expired(schedule) {
     var now = moment();
-    var start = moment(sch.start,'DD/MM/YYYY HH:mm');
+    var start = moment(schedule.start,'DD/MM/YYYY HH:mm');
     var diff = start - now;
     if (diff < 0) {
         return true;
@@ -58,9 +58,20 @@ function isExpired(sch) {
 }
 
 /*
- * Inform the instance of Logic that there is a new schedule
+ * Write the recording into the database
  */
-Logic.prototype.notify = function() {
+function updateDatabase(recording) {
+
+    var track = recording.filename;
+
+    probe(track, function getExtention(err, probeData) {
+        extention = probeData.format.format_name;
+        trackName = track + '.' + extention;
+        fs.rename(track, trackName, function write(err) {
+            console.log('File was renamed successfully');
+        });
+    });
 }
+
 
 module.exports = Logic;

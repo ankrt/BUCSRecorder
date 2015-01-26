@@ -28,9 +28,11 @@ rec.initForm = function() {
     $(".duration").children("select").append(durationOptions);
 
     var $selector = $(".datetime").children(".input-group.date");
-    $selector.datetimepicker();
-    $selector.data('DateTimePicker').setMinDate(moment());
-    $selector.data('DateTimePicker').setMaxDate(moment().add(21, 'days'));
+    $selector.datetimepicker({
+        format: 'DD/MM/YYYY HH:mm',
+        minDate: moment(),
+        maxDate: moment().add(21, 'days')
+    });
 }
 
 // add a form to the page
@@ -47,11 +49,11 @@ rec.addForm = function() {
     }
     $form.after(nextForm);
 
-    // this is duplicate code, should be refactored out
-    var $datetimeSelector = $(".datetime", nextForm).children(".input-group.date");
-    $datetimeSelector.datetimepicker();
-    $datetimeSelector.data('DateTimePicker').setMinDate(moment());
-    $datetimeSelector.data('DateTimePicker').setMaxDate(moment().add(42, 'days'));
+    //// this is duplicate code, should be refactored out
+    //var $datetimeSelector = $(".datetime", nextForm).children(".input-group.date");
+    //$datetimeSelector.datetimepicker();
+    //$datetimeSelector.data('DateTimePicker').setMinDate(moment());
+    //$datetimeSelector.data('DateTimePicker').setMaxDate(moment().add(21, 'days'));
 }
 
 // remove a form when the remove button is clicked
@@ -59,14 +61,12 @@ $("body").on('click', ".remove-button", function() {
     $(this).closest(".form").remove();
 });
 
-//$("body").on('click', "button.submit", function(e) {
 $("button#submit").on('click', function(e) {
     e.preventDefault();
 
     // no error checking just yet.
 
     // bring form fields into one object
-    // TODO: use station ID instead of name
     var newSchedule = {
         'station' : $('.form-group.station select').val(),
         'start' : $('.form-group.datetime input').val(),

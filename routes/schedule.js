@@ -27,7 +27,6 @@ router.post('/submit', function(req, res) {
     var logic = req.logic;
     db.collection('schedule').insert(req.body, function(err, result) {
         res.send((err === null) ? {msg: ''} : {msg: err});
-        logic.notify();
     });
 });
 
