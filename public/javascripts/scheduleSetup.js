@@ -1,7 +1,8 @@
 var rowNum = 0;
 
 // DOM Ready
-$(document).ready(function() {
+//$(document).ready(function() {
+$(window).on('load', function() {
     rec.initForm();
 });
 

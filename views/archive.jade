@@ -1,8 +1,9 @@
 extends layout
 
 block content
-   .container
-      h3= title
+    .container
+        h3= title
 
-      p On this page you will be able to search through the recording archive.
+        .container-fluid#recording-list
 
+    script(src='/javascripts/archiveSetup.js')

@@ -9,11 +9,13 @@ function Recorder(station, schedule) {
     this.streams = station.streams;
     this.recording = {
         station: schedule.station,
+        stationName: station.name,
         date: schedule.start,
         duration: Number(schedule.duration),
         description: schedule.description,
         tags: [],
-        filename: './tmp/' + uuid.v4()
+        path: './tmp/',
+        filename: uuid.v4()
     };
 }
 
@@ -27,18 +29,19 @@ Recorder.prototype.activate = function(callback) {
     // recording
     var duration = moment.duration(this.recording.duration, 'minutes').valueOf();
     var filename = this.recording.filename;
+    var path = this.recording.path;
     var streams = this.streams;
 
     // timer to start of recording
     setTimeout(function() {
-        record(duration, streams, filename, callback);
+        record(duration, streams, path, filename, callback);
     }, wait.valueOf());
 }
 
 /*
  * record information from a stream
  */
-function record(duration, streams, filename, callback) {
+function record(duration, streams, path, filename, callback) {
 
     var start = moment(); // time when recording was started
     var elapsed = 0; // elapsed time in ms since start of recording
@@ -54,7 +57,7 @@ function record(duration, streams, filename, callback) {
         elapsed = now.valueOf() - start.valueOf();
 
         if (elapsed < duration) {
-            fs.appendFile(filename, chunk, function(err) {
+            fs.appendFile(path + filename, chunk, function(err) {
                 if (err) {
                     console.log('There was an error writing t othe file');
                 }

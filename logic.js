@@ -2,6 +2,7 @@ var Recorder = require('./recorder');
 var fs = require('fs');
 var moment = require('moment');
 var mongo = require('mongoskin');
+var ObjectID = require('mongodb').ObjectID;
 var db = mongo.db("mongodb://localhost:27017/recorder", {native_parser:true});
 var probe = require('node-ffprobe');
 
@@ -37,7 +38,8 @@ function activate(schedule) {
         db.collection('stations').findById(schedule.station, function(err, station) {
             var rec = new Recorder(station, schedule);
             rec.activate(function() {
-                updateDatabase(rec.recording);
+                console.log(rec.recording);
+                archive(rec.recording);
             });
         });
     }
@@ -58,17 +60,45 @@ function expired(schedule) {
 }
 
 /*
- * Write the recording into the database
+ * Add the recording to the archive
  */
-function updateDatabase(recording) {
+function archive(recording) {
 
-    var track = recording.filename;
+    var path = recording.path;
+    var filename = recording.filename;
+    var fileID = new ObjectID();
+    console.log(fileID);
 
-    probe(track, function getExtention(err, probeData) {
+    // WARNING: Callback Hell
+    // probe file for metadata
+    probe(path + filename, function getExtention(err, probeData) {
+        console.log(probeData);
         extention = probeData.format.format_name;
-        trackName = track + '.' + extention;
-        fs.rename(track, trackName, function write(err) {
-            console.log('File was renamed successfully');
+        // rename file to include appropriate extention
+        fs.rename(path + filename, path + filename + '.' + extention, function write(err) {
+            filename = filename + '.' + extention;
+            // store file to gridFS collection in database
+            gs = db.gridStore(fileID, filename, 'w');
+            gs.open(function(err, gs) {
+                gs.writeFile(path + filename, function(err, gs) {
+                    gs.close(function() {
+                        // delete file from filesystem
+                        fs.unlink(path + filename);
+                        // File is stored, need to add information to Archive collection
+                        var document = {
+                            file: fileID,
+                            duration: recording.duration,
+                            dateAdded: recording.date,
+                            stationName: recording.stationName,
+                            views: 0,
+                            description: recording.description,
+                            tags: []};
+                        db.collection('archive').insert(document, function(err, record) {
+                            console.log('Record added as: ' + record[0]._id);
+                        });
+                    });
+                });
+            });
         });
     });
 }
