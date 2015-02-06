@@ -38,7 +38,6 @@ function activate(schedule) {
         db.collection('stations').findById(schedule.station, function(err, station) {
             var rec = new Recorder(station, schedule);
             rec.activate(function() {
-                console.log(rec.recording);
                 archive(rec.recording);
             });
         });

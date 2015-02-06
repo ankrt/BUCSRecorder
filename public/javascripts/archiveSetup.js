@@ -29,7 +29,7 @@ rec.loadRecordings = function() {
             recording += '<div class="col-sm-6">';
             recording += '<p>' + this.tags + '</p>';
             // Change this to support other filetypes
-            recording += '<a href="/archive/recordings/' + this.file + '.mp3">Download</a>';
+            recording += '<a href="/archive/recordings/download/' + this.file + '.mp3">Download</a>';
             recording += '</div>'; // col-sm-6
             recording += '</div>'; // panel-body
             recording += '</div>'; // panel panel-default

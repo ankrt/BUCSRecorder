@@ -1,6 +1,7 @@
 var fs = require('fs');
 var moment = require('moment');
 var uuid = require('node-uuid');
+var spawn = require('child_process').spawn;
 var request = require('request');
 
 // constructor
@@ -43,15 +44,32 @@ Recorder.prototype.activate = function(callback) {
  */
 function record(duration, streams, path, filename, callback) {
 
-    var start = moment(); // time when recording was started
-    var elapsed = 0; // elapsed time in ms since start of recording
-    var s = streams[0]; // must work out how to utilise all streams
+    var start = moment();
+    var elapsed = 0;
+    var url = streams[0];
+    var re = /^http/i;
+    var stream;
+    var ext = '';
 
-    console.log('recording from %s for duration of %d ms', s, duration);
+    // Use different recorders depending on the stream type
+    if (url.search(re) == 0) {
+        stream = request(url);
+    } else {
+        console.log('Does not start with http');
+        ext = '.mp3'
+        var command = 'ffmpeg';
+        var args = [
+            '-i',
+            url,
+            '-t',
+            duration / 1000,
+            path + filename + ext];
+        stream = spawn(command, args);
+    }
 
-    var stream = request(s);
 
-    // handle data events
+    // Stream Event Handlers
+    // request type handlers
     stream.on('data', function(chunk) {
         var now = moment();
         elapsed = now.valueOf() - start.valueOf();
@@ -68,17 +86,23 @@ function record(duration, streams, path, filename, callback) {
         }
     });
 
-    // handle end event
     stream.on('end', function() {
         stream.end();
         stream.emit('close');
     });
 
-    // close stream and write file to database
-    stream.on('close', callback);
+    // shared event handlers
+    stream.on('error', function(err) {
+        console.log('Error: ' + err.message);
+    });
 
-    stream.on('error', function() {
-        console.log('There was an error with the stream');
+    //stream.on('close', callback);
+    stream.on('close', function() {
+        if (ext != '') {
+            fs.rename(path + filename + ext, path + filename, callback);
+        } else {
+            callback();
+        }
     });
 }
 

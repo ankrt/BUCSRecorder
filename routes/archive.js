@@ -19,7 +19,7 @@ router.get('/recordings', function(req, res) {
     });
 });
 
-router.get('/recordings/:id.mp3', function(req, res) {
+router.get('/recordings/download/:id.mp3', function(req, res) {
     var db = req.db;
     var id = req.params.id;
     console.log(id);
