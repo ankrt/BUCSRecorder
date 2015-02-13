@@ -4,6 +4,16 @@ block content
     .container
         h3= title
 
-        .container-fluid#recording-list
+        .container-fluid
+            .row
+                .panel.panel-default.no-border
+                    .panel-body
+                        .col-lg-12
+                            .input-group
+                                input.form-control#search-box(type='text', placeholder='Search the Archive')
+                                span.input-group-btn
+                                    button(class='btn btn-default', type='button') Go
+
+            #recording-list
 
     script(src='/javascripts/archiveSetup.js')

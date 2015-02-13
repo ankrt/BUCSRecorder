@@ -9,34 +9,64 @@ $(document).ready(function() {
 
 rec.loadRecordings = function() {
     // recordings
-    var recording = '';
+    var recording;
 
-    $.getJSON('/archive/recordings', function(data) {
-        $.each(data, function() {
-            // There must be a better way than this!
-            recording = '<div class="row">';
-            recording += '<div class="panel panel-default">';
-            recording += '<div class="panel-heading">';
-            recording += '<h4 class="panel-title">' + this.description + '</h4>';
-            recording += '</div>'; // panel-heading
-            recording += '<div class="panel-body">';
-            recording += '<div class="col-sm-6">';
-            recording += '<p>' + this.stationName + '</p>';
-            recording += '<p>' + this.dateAdded + '</p>';
-            recording += '<p>' + this.duration + ' minutes</p>';
-            recording += '<p>' + this.views + '</p>';
-            recording += '</div>'; // col-sm-6
-            recording += '<div class="col-sm-6">';
-            recording += '<p>' + this.tags + '</p>';
-            // Change this to support other filetypes
-            recording += '<a href="/archive/recordings/download/' + this.file + '.mp3">Download</a>';
-            recording += '</div>'; // col-sm-6
-            recording += '</div>'; // panel-body
-            recording += '</div>'; // panel panel-default
-            recording += '</div>'; // row
+    $.getJSON('/archive/recordings', rec.generateHTML)
+}
 
-            $(".container-fluid#recording-list").append(recording);
+rec.generateHTML = function(data) {
+    $.each(data, function() {
+        recording = $([
+        "<div class='row'>",
+            "<div class='panel panel-default'>",
+                "<div class='panel-heading'>",
+                    "<h4 class='panel-title'>" + this.description + "</h4>",
+                "</div>",
+                "<div class='panel-body'>",
+                    "<div class='col-sm-6'>",
+                        "<p>" + this.stationName + "</p>",
+                        "<p>" + this.dateAdded + "</p>",
+                        "<p>" + this.duration + " minutes</p>",
+                        "<p>" + this.views + "</p>",
+                    "</div>",
+                    "<div class='col-sm-6'>",
+                        "<div class='panel panel-default'>",
+                            "<div class='panel-body'>",
+                                "<audio controls preload='none' type='audio/mp3' src='/archive/recordings/download/" + this.file + ".mp3'>Browser playback not supported</audio>",
+                            "</div>",
+                        "</div>",
+                        "<p>" + this.tags + "</p>",
+                        "<a href='/archive/recordings/download/" + this.file + ".mp3'>Download</a>",
+                    "</div>",
+                "</div>",
+            "</div>",
+        "</div>"
+        ].join("\n"));
 
-        });
+        $("#recording-list").append(recording);
     });
 }
+
+
+// search database on text entry into the search box
+$('#search-box').on('input', function(e) {
+    var query = {
+        'searchTerm': $(this).val()
+    };
+
+    $.ajax({
+        type: 'POST',
+        data: query,
+        url: '/archive/search',
+        dataType: 'JSON'
+    }).done(function(res) {
+        if (res.msg === '') {
+            // something
+        } else {
+            $('#recording-list').empty();
+            var recording = '';
+            rec.generateHTML(res);
+            //window.alert(JSON.stringify(res));
+        }
+    });
+});

@@ -5,3 +5,11 @@ body {
 a {
   color: #2965A8;
 }
+
+.panel.no-border {
+    border: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    -o-box-shadow: none;
+    box-shadow: none;
+}
