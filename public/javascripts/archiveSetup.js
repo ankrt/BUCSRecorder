@@ -28,16 +28,22 @@ rec.generateHTML = function(data) {
                         "<p>" + this.dateAdded + "</p>",
                         "<p>" + this.duration + " minutes</p>",
                         "<p>" + this.views + "</p>",
-                    "</div>",
+                    "</div>", // END COL 1
                     "<div class='col-sm-6'>",
                         "<div class='panel panel-default'>",
                             "<div class='panel-body'>",
-                                "<audio controls preload='none' type='audio/mp3' src='/archive/recordings/download/" + this.file + ".mp3'>Browser playback not supported</audio>",
+                                "<audio preload='none' type='audio/mp3' src='/archive/recordings/download/" + this.file + ".mp3'>Browser playback not supported</audio>",
+                                "<button type='button' class='btn btn-default'>",
+                                    "<span class='glyphicon glyphicon-download-alt'/>",
+                                "</button>",
+                                "<button type='button' class='btn btn-default play-pause-toggle'>",
+                                    "<span class='glyphicon glyphicon-play'/>",
+                                "</button>",
                             "</div>",
                         "</div>",
                         "<p>" + this.tags + "</p>",
                         "<a href='/archive/recordings/download/" + this.file + ".mp3'>Download</a>",
-                    "</div>",
+                    "</div>", // END COL 2
                 "</div>",
             "</div>",
         "</div>"
@@ -48,7 +54,9 @@ rec.generateHTML = function(data) {
 }
 
 
-// search database on text entry into the search box
+/*
+ * search database on text entry into the search box
+ */
 $('#search-box').on('input', function(e) {
     var query = {
         'searchTerm': $(this).val()
@@ -69,4 +77,25 @@ $('#search-box').on('input', function(e) {
             //window.alert(JSON.stringify(res));
         }
     });
+});
+
+/*
+ * play/pause audio on button presses
+ */
+//$('button.play-pause-toggle').click(function() {
+$('body').on('click', 'button.play-pause-toggle', function() {
+
+    var playing = $(this).children().hasClass('glyphicon-pause');
+    var oldState = playing ? 'glyphicon-pause' : 'glyphicon-play';
+    var newState = !playing ? 'glyphicon-pause' : 'glyphicon-play';
+
+    $(this).children().removeClass(oldState);
+    $(this).children().addClass(newState);
+    var player = $(this).siblings('audio')[0];
+
+    if (playing) {
+        player.pause();
+    } else {
+        player.play();
+    }
 });
