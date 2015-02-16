@@ -13,3 +13,23 @@ a {
     -o-box-shadow: none;
     box-shadow: none;
 }
+
+#search-bar {
+    margin-bottom: 30px;
+}
+
+#recording-list .well {
+    background: transparent;
+}
+
+
+#recording-list .progress {
+    margin-bottom: 0;
+    height: 26px;
+    margin-left: 5px;
+    margin-top: 1px;
+}
+
+#recording-list form {
+    margin-bottom: 0;
+}

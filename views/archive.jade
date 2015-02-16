@@ -1,20 +1,25 @@
 extends layout
 
 block content
+    //-container for the whole page
     .container
+        //-page title
         h3= title
 
-        .container-fluid
-            .row
-                .panel.panel-default.no-border
-                    .panel-body
-                        .col-lg-12
-                            .input-group
-                                input.form-control#search-box(type='text', placeholder='Search the Archive')
-                                span.input-group-btn
-                                    button(class='btn btn-default', type='button')
-                                        span.glyphicon.glyphicon-search
+        .row
+            .col-md-offset-6.col-md-6.col-xs-12#search-bar
+                .input-group
+                    input.form-control#search-box(type='text', placeholder='Search the Archive')
+                    span.input-group-btn
+                        button(class='btn btn-default', type='button')
+                            span.glyphicon.glyphicon-search(aria-hidden='true')
+                            span.sr-only Search
 
-            #recording-list
+        #recording-list
 
+    script(type='text/javascript').
+        $(window).on('load resize', function(e) {
+            var progWidth = $('#recording-list .well').width() - 20 - 118 - 42;
+            $('#recording-list .progress').css('width', progWidth);
+        });
     script(src='/javascripts/archiveSetup.js')
