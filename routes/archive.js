@@ -25,12 +25,39 @@ router.get('/recordings', function(req, res) {
 router.get('/recordings/download/:id.mp3', function(req, res) {
     var db = req.db;
     var id = req.params.id;
-    console.log(id);
+    var ranges = desiredRanges(req.headers);
+
+    // Ridiculous hack to get around Safari's
+    // absurd request range system
+    if (ranges.start === ranges.end) {
+        res.sendStatus(416);
+        return;
+    }
 
     var gs = db.gridStore(ObjectID(id), 'r');
-    gs.read(function(err, data) {
-        gs.close(function() {
-            res.send(data);
+
+    // seek to desired point of file
+    gs.seek(ranges.start, function(err) {
+        // read the following len bytes from file
+        if (ranges.end === null || ranges.end > gs._native.length) {
+            ranges.end = gs._native.length;
+        }
+        var len = ranges.end - ranges.start;
+
+        gs.read(len, function(err, data) {
+            gs.close(function() {
+                var headers = {
+                    'Content-Type': 'audio/mpeg',
+                    'Content-Length': String(len),
+                    'Content-Range': 'bytes ' + String(ranges.start) + '-' + String(ranges.end) + '/' + String(gs._native.length),
+                    'Accept-Ranges': 'byte'
+                };
+                // Set the status code to:
+                //  - 206 if data is partial
+                //  - 200 if the full data is sent
+                var stat = len < gs._native.length ? 206 : 200;
+                res.status(stat).set(headers).send(data);
+            });
         });
     });
 });
@@ -50,5 +77,22 @@ router.post('/search', function(req, res) {
         res.json(items);
     });
 });
+
+desiredRanges = function(header) {
+    var re = /bytes=(\d+)-(\d*)/;
+    var ranges = {
+        start: 0,
+        end: null
+    };
+
+    if (header.range != undefined) {
+        var result = re.exec(header.range);
+        ranges.start = parseInt(result[1]);
+        ranges.end = result[2] === '' ? null : parseInt(result[2]);
+        return ranges;
+    } else {
+        return ranges;
+    }
+}
 
 module.exports = router;

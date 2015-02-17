@@ -1,20 +1,77 @@
 
-// DOM Ready
+// On page load, fetch recordings and render page
 $(document).ready(function() {
-    rec.loadRecordings();
+    rec.loadRecordings()
 });
+
+// On window resize adjust the width of the progress bar
+$(window).on('load resize', rec.resizeProgressBar);
+
+// search database on text entry into the search box
+// TODO: Refactor this into its own function
+$('#search-box').on('input', function(e) {
+    var query = {
+        'searchTerm': $(this).val()
+    };
+
+    $.ajax({
+        type: 'POST',
+        data: query,
+        url: '/archive/search',
+        dataType: 'JSON'
+    }).done(function(res) {
+        if (res.msg === '') {
+            // something
+        } else {
+            $('#recording-list').empty();
+            var recording = '';
+            rec.generateHTML(res);
+            //window.alert(JSON.stringify(res));
+        }
+    });
+});
+
+// play/pause audio on button presses
+// TODO: Refactor this into its own function
+$('body').on('click', 'button.play-pause-toggle', function() {
+
+    var playing = $(this).children().hasClass('glyphicon-pause');
+    var oldState = playing ? 'glyphicon-pause' : 'glyphicon-play';
+    var newState = !playing ? 'glyphicon-pause' : 'glyphicon-play';
+
+    $(this).children().removeClass(oldState);
+    $(this).children().addClass(newState);
+    var audio = $(this).siblings('audio')[0];
+
+    if (playing) {
+        audio.pause();
+    } else {
+        audio.play();
+    }
+
+});
+
+// When the metadata is loaded
 
 
 
 // FUNCTIONS
 
-rec.loadRecordings = function() {
-    // recordings
-    var recording;
+rec.resizeProgressBar = function() {
+    var progWidth = $('#recording-list .well').width() - 20 - 118 - 42;
+    $('#recording-list .progress').css('width', progWidth);
+}
 
+rec.loadRecordings = function() {
+    var recording;
     $.getJSON('/archive/recordings', rec.generateHTML)
 }
 
+/*
+ * Awful template system that needs to be changed
+ * TODO: Make this render from a jade template on the server
+ * then send to the client
+ */
 rec.generateHTML = function(data) {
     $.each(data, function() {
         recording = $([
@@ -41,7 +98,7 @@ rec.generateHTML = function(data) {
                                 // Audio control
                                 "<div class='btn-toolbar' role='toolbar'>",
                                     "<div class='btn-group' role='group'>",
-                                        "<audio preload='none' type='audio/mp3' src='/archive/recordings/download/" + this.file + ".mp3'>Browser playback not supported</audio>",
+                                        "<audio preload='none' type='audio/mpeg' codecs='mp3' src='/archive/recordings/download/" + this.file + ".mp3'>Browser playback not supported</audio>",
                                         // Play-Pause Toggle
                                         "<button type='button' class='btn btn-default play-pause-toggle'>",
                                             "<span class='glyphicon glyphicon-play'/>",
@@ -86,55 +143,8 @@ rec.generateHTML = function(data) {
         ].join("\n"));
 
         $("#recording-list").append(recording);
-
-        var progWidth = $('#recording-list .well').width() - 20 - 118 - 42;
-        $('#recording-list .progress').css('width', progWidth);
     });
+    rec.resizeProgressBar();
 }
 
 
-/*
- * search database on text entry into the search box
- */
-$('#search-box').on('input', function(e) {
-    var query = {
-        'searchTerm': $(this).val()
-    };
-
-    $.ajax({
-        type: 'POST',
-        data: query,
-        url: '/archive/search',
-        dataType: 'JSON'
-    }).done(function(res) {
-        if (res.msg === '') {
-            // something
-        } else {
-            $('#recording-list').empty();
-            var recording = '';
-            rec.generateHTML(res);
-            //window.alert(JSON.stringify(res));
-        }
-    });
-});
-
-/*
- * play/pause audio on button presses
- */
-//$('button.play-pause-toggle').click(function() {
-$('body').on('click', 'button.play-pause-toggle', function() {
-
-    var playing = $(this).children().hasClass('glyphicon-pause');
-    var oldState = playing ? 'glyphicon-pause' : 'glyphicon-play';
-    var newState = !playing ? 'glyphicon-pause' : 'glyphicon-play';
-
-    $(this).children().removeClass(oldState);
-    $(this).children().addClass(newState);
-    var player = $(this).siblings('audio')[0];
-
-    if (playing) {
-        player.pause();
-    } else {
-        player.play();
-    }
-});
