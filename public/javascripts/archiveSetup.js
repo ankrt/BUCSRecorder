@@ -1,11 +1,26 @@
 
 // On page load, fetch recordings and render page
 $(document).ready(function() {
-    rec.loadRecordings()
+    $('body').on('playing', 'audio', function() {
+        alert('Audio is playing');
+    });
+    $.ajax({
+        type: 'GET',
+        url: '/archive/recordings',
+        dataType: 'HTML'
+    }).done(function(res) {
+        if (res.msg === '') {
+            // something
+        } else {
+            $('#recording-list').empty();
+            $('#recording-list').append(res);
+        }
+        rec.resizeProgressBar();
+    });
 });
 
 // On window resize adjust the width of the progress bar
-$(window).on('load resize', rec.resizeProgressBar);
+$(window).on('resize', rec.resizeProgressBar);
 
 // search database on text entry into the search box
 // TODO: Refactor this into its own function
@@ -24,36 +39,78 @@ $('#search-box').on('input', function(e) {
             // something
         } else {
             $('#recording-list').empty();
-            var recording = '';
-            rec.generateHTML(res);
-            //window.alert(JSON.stringify(res));
+            $('#recording-list').append(res);
         }
+        rec.resizeProgressBar();
     });
 });
 
 // play/pause audio on button presses
 // TODO: Refactor this into its own function
 $('body').on('click', 'button.play-pause-toggle', function() {
-
-    var playing = $(this).children().hasClass('glyphicon-pause');
-    var oldState = playing ? 'glyphicon-pause' : 'glyphicon-play';
-    var newState = !playing ? 'glyphicon-pause' : 'glyphicon-play';
-
-    $(this).children().removeClass(oldState);
-    $(this).children().addClass(newState);
+    var me = $(this); // only used within callbacks
     var audio = $(this).siblings('audio')[0];
+    var paused = audio.paused;
+    var oldState = !paused ? 'glyphicon-pause' : 'glyphicon-play';
+    var newState = paused ? 'glyphicon-pause' : 'glyphicon-play';
 
-    if (playing) {
-        audio.pause();
-    } else {
+    $(this).children('span').removeClass(oldState);
+    $(this).children('span').addClass(newState);
+
+    if (paused) {
         audio.play();
+        interval = window.setInterval(function() {
+            progress_seconds = Math.ceil(audio.currentTime);
+            progress_percent = Math.ceil(audio.currentTime / audio.duration * 100);
+            $(me).parent().next().find('.progress-bar').attr('style', 'width: ' + progress_percent + '%');
+        }, 1000);
+    } else {
+        audio.pause();
+        window.clearInterval(interval);
     }
 
 });
 
-// When the metadata is loaded
+// turn the volume down
+$('body').on('click', 'button.volume-down', function() {
+    var audio = $(this).siblings('audio')[0];
+    if (audio.volume > 0.1) {
+        audio.volume -= 0.1;
+        console.log(audio.volume);
+    }
+});
+
+// turn the volume up
+$('body').on('click', 'button.volume-up', function() {
+    var audio = $(this).siblings('audio')[0];
+    if (audio.volume < 1) {
+        audio.volume += 0.10;
+        console.log(audio.volume);
+    }
+});
+
+// seek through the recording
+$('body').on('click', '.progress', function(event) {
+    var me = $(this);
+    var audio = $(this).parent().prev().find('audio');
+
+    // compute where the user clicked
+    var width = me.width();
+    var offset = me.offset().left;
+    var clickPercent = (event.pageX - offset) / width;
+
+    // advance the progress bar to this point
+    me.children('.progress-bar').attr('style', 'width: ' + Math.ceil(clickPercent * 100) + '%');
+    // change the current position in the audio
+    console.log('Seeking to: ' + Math.ceil(audio[0].duration * clickPercent));
+    console.log('Time before seek: ' + audio[0].currentTime);
+    audio[0].currentTime = Math.ceil(audio[0].duration * clickPercent);
+    console.log('Time after seek: ' + audio[0].currentTime);
+    //alert(Math.ceil(audio[0].duration * clickPercent));
+});
 
 
+// update progress bar based on audio timeupdate events
 
 // FUNCTIONS
 
@@ -61,90 +118,4 @@ rec.resizeProgressBar = function() {
     var progWidth = $('#recording-list .well').width() - 20 - 118 - 42;
     $('#recording-list .progress').css('width', progWidth);
 }
-
-rec.loadRecordings = function() {
-    var recording;
-    $.getJSON('/archive/recordings', rec.generateHTML)
-}
-
-/*
- * Awful template system that needs to be changed
- * TODO: Make this render from a jade template on the server
- * then send to the client
- */
-rec.generateHTML = function(data) {
-    $.each(data, function() {
-        recording = $([
-        //"<div class='row'>",
-            "<div class='panel panel-default'>",
-                "<div class='panel-heading'>",
-                    "<h4 class='panel-title'>" + this.description + "</h4>",
-                "</div>",
-                "<div class='panel-body'>", // Pannel Body
-                "<div class='row'>", // Row
-
-                    // Column 1
-                    "<div class='col-xs-12 col-sm-4'>",
-                        "<p>" + this.stationName + "</p>",
-                        "<p>" + this.dateAdded + "</p>",
-                        "<p>" + this.duration + " minutes</p>",
-                        "<p>" + this.views + "</p>",
-                    "</div>",
-
-                    // Column 2
-                    "<div class='col-xs-12 col-sm-8'>",
-                        "<div class='well'>",
-
-                                // Audio control
-                                "<div class='btn-toolbar' role='toolbar'>",
-                                    "<div class='btn-group' role='group'>",
-                                        "<audio preload='none' type='audio/mpeg' codecs='mp3' src='/archive/recordings/download/" + this.file + ".mp3'>Browser playback not supported</audio>",
-                                        // Play-Pause Toggle
-                                        "<button type='button' class='btn btn-default play-pause-toggle'>",
-                                            "<span class='glyphicon glyphicon-play'/>",
-                                        "</button>",
-                                        // Volume Down
-                                        "<button type='button' class='btn btn-default vol-down'>",
-                                            "<span class='glyphicon glyphicon-volume-down'/>",
-                                        "</button>",
-                                        // Volume Up
-                                        "<button type='button' class='btn btn-default vol-up'>",
-                                            "<span class='glyphicon glyphicon-volume-up'/>",
-                                        "</button>",
-                                    "</div>",
-
-                                    // Progress bar
-                                    "<div class='btn-group' role='group'>",
-                                        "<div class='progress'>",
-                                            "<div class='progress-bar' role='progressbar' aria-valuemin='0' aria-value-max='100' style='width: 0%;'>",
-                                                "<span class='sr-only'>Track progress bar</span>",
-                                            "</div>",
-                                        "</div>",
-                                    "</div>",
-
-                                    // Download Button
-                                    "<div class='btn-group pull-right' role='group'>",
-                                        "<form method='get' action='/archive/recordings/download/" + this.file + ".mp3'>",
-                                            "<button type='submit' class='btn btn-default'>",
-                                                "<span class='glyphicon glyphicon-download-alt'/>",
-                                            "</button>",
-                                        "</form>",
-                                    "</div>",
-
-                                "</div>", // End btn-toolbar
-
-
-                        "</div>", // End well
-
-                    "</div>", // END Row
-                "</div>", // END Panel Body
-            "</div>"
-        //"</div>"
-        ].join("\n"));
-
-        $("#recording-list").append(recording);
-    });
-    rec.resizeProgressBar();
-}
-
 

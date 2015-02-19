@@ -25,7 +25,7 @@ a {
 
 #recording-list .progress {
     margin-bottom: 0;
-    height: 26px;
+    height: 32px;
     margin-left: 5px;
     margin-top: 1px;
 }
@@ -33,3 +33,4 @@ a {
 #recording-list form {
     margin-bottom: 0;
 }
+

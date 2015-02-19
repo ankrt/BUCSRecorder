@@ -1,0 +1,40 @@
+
+// archive panel
+.panel.panel-default
+    .panel-heading
+        h4.panel-title #{description}
+    .panel-body
+        .row
+            // column one in the panel
+            .col-xs-12.col-sm-4
+                p #{stationName}
+                p #{dateAdded}
+                p #{duration} minutes
+                p #{views} downloads
+            // column two in the panel
+            .col-xs-12.col-sm-8
+                .well
+                    .btn-toolbar(role='toolbar')
+                        // audio controls
+                        .btn-group(role='group')
+                            audio(preload='none', loop='true') Browser playback not supported
+                                source(src='/archive/recordings/download/' + locals.file + '.mp3', type='audio/mpeg')
+                            button.btn.btn-default.play-pause-toggle(type='button')
+                                span.glyphicon.glyphicon-play
+                            button.btn.btn-default.volume-down(type='button')
+                                span.glyphicon.glyphicon-volume-down
+                            button.btn.btn-default.volume-up(type='button')
+                                span.glyphicon.glyphicon-volume-up
+                        // progress bar
+                        .btn-group(role='group')
+                            .progress
+                                .progress-bar(role='progressbar', aria-valuemin='0', aria-value-max='100', style='width: 0%;')
+                                    span.sr-only
+                                        Progress bar
+                        // download button
+                        .btn-group.pull-right(role='group')
+                            form(method='get', action='/archive/recordings/download/' + locals.file + '.mp3')
+                                button.btn.btn-default(type='submit')
+                                    span.glyphicon.glyphicon-download-alt
+        // ! row
+    // ! panel body
