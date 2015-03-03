@@ -17,9 +17,4 @@ block content
 
         #recording-list
 
-    script(type='text/javascript').
-        $(window).on('load resize', function(e) {
-            var progWidth = $('#recording-list .well').width() - 20 - 118 - 42;
-            $('#recording-list .progress').css('width', progWidth);
-        });
     script(src='/javascripts/archiveSetup.js')

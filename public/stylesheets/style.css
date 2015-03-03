@@ -34,3 +34,36 @@ a {
     margin-bottom: 0;
 }
 
+div.trimmer {
+    /*width: 500px;*/
+    /*height: 150px;*/
+    margin: 50px auto auto auto;
+    /*border-radius: 15px;*/
+    /*border: solid;*/
+}
+
+div.timeline {
+    width: 100%;
+    height: 100px;
+    float: center;
+    /*border: solid;*/
+    background: rgba(0,0,0,.3);
+}
+
+div.Lslider {
+    position: relative;
+    float: right;
+    right: 100%;
+	width: 10px;
+	height: 110%;
+	background: red;
+}
+
+div.Rslider {
+    position: relative;
+    float: left;
+    left: 100%;
+	width: 10px;
+	height: 110%;
+	background: green;
+}

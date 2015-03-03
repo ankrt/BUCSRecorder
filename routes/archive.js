@@ -4,6 +4,10 @@ var ObjectID = require('mongodb').ObjectID;
 var router = express.Router();
 
 var archiveItem = jade.compileFile('views/archiveItem.jade', {cache: true});
+//var archiveItem = jade.compileFile('views/archiveItem.jade');
+/*
+ * render the data into html
+ */
 interpolate = function(element) {
     return archiveItem(element);
 }
@@ -28,9 +32,9 @@ router.get('/recordings', function(req, res) {
 });
 
 /*
- * GET file and send so user can download
+ * GET file so it can be streamed to user
  */
-router.get('/recordings/download/:id.mp3', function(req, res) {
+router.get('/recordings/stream/:id.mp3', function(req, res) {
     var db = req.db;
     var id = req.params.id;
     var ranges = desiredRanges(req.headers);
@@ -71,6 +75,68 @@ router.get('/recordings/download/:id.mp3', function(req, res) {
 });
 
 /*
+ * GET file so it can be downloaded by user
+ * this is fundamentally the same as the 'stream' version
+ * however, the content disposition flag is set in the response
+ * so as to cause a file download
+ */
+router.get('/recordings/download/:id.mp3?', function(req, res) {
+    var db = req.db;
+    var id = req.params.id;
+    var ranges = {};// = desiredRanges(req.headers);
+    // get byte range from headers unless explicitly defined
+    // in the url
+    console.log(req.query.startBytes);
+    console.log(req.query.endBytes);
+
+    if(req.query.startBytes != undefined && req.query.endBytes != undefined) {
+        ranges = {
+            start: parseInt(req.query.startBytes),
+            end: parseInt(req.query.endBytes)
+        }
+    } else {
+        ranges = desiredRanges(req.headers);
+    }
+
+    // Ridiculous hack to get around Safari's
+    // absurd request range system
+    if (ranges.start === ranges.end) {
+        res.sendStatus(416);
+        return;
+    }
+
+    var gs = db.gridStore(ObjectID(id), 'r');
+
+    // seek to desired point of file
+    gs.seek(ranges.start, function(err) {
+        // read the following len bytes from file
+        if (ranges.end === null || ranges.end > gs._native.length) {
+            ranges.end = gs._native.length;
+        }
+        var len = ranges.end - ranges.start;
+
+        gs.read(len, function(err, data) {
+            gs.close(function() {
+                var headers = {
+                    'Content-Type': 'audio/mpeg',
+                    'Content-Length': String(len),
+                    'Content-Range': 'bytes ' + String(ranges.start) + '-' + String(ranges.end) + '/' + String(gs._native.length),
+                    'Content-Disposition': 'attachment',
+                    'Accept-Ranges': 'byte'
+                };
+                // Set the status code to:
+                //  - 206 if data is partial
+                //  - 200 if the full data is sent
+                var stat = len < gs._native.length ? 206 : 200;
+                res.status(stat).set(headers).send(data);
+            });
+        });
+    });
+});
+
+
+
+/*
  * POST search term, reply with results
  * TODO: Make the search more advanced
  *  - Search through tags
@@ -86,6 +152,28 @@ router.post('/search', function(req, res) {
         //console.log(res.req);
         res.json(html);
         //res.type('html').send(html.join('\n'));
+    });
+});
+
+/*
+ * GET trimmer page,
+ * where users will be able to trim the start
+ * and end of a recording so the only download
+ * the part that they need
+ */
+router.get('/trim/:id', function(req, res) {
+    var db = req.db;
+    var id = req.params.id;
+    var len = 0;
+
+    // Get the size of the file in bytes...
+    // can use this to work out which byte ranges to download
+    var gs = db.gridStore(ObjectID(id), 'r');
+    gs.open(function() {
+        len = gs._native.length;
+        gs.close(function() {
+            res.render('trim', {title : 'Trimmer', 'file' : id, 'bytes' : len})
+        });
     });
 });
 

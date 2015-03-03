@@ -15,10 +15,10 @@
             .col-xs-12.col-sm-8
                 .well
                     .btn-toolbar(role='toolbar')
+                        audio(preload='none', loop='true') Browser playback not supported
+                            source(src='/archive/recordings/stream/' + locals.file + '.mp3', type='audio/mpeg')
                         // audio controls
                         .btn-group(role='group')
-                            audio(preload='none', loop='true') Browser playback not supported
-                                source(src='/archive/recordings/download/' + locals.file + '.mp3', type='audio/mpeg')
                             button.btn.btn-default.play-pause-toggle(type='button')
                                 span.glyphicon.glyphicon-play
                             button.btn.btn-default.volume-down(type='button')
@@ -33,8 +33,11 @@
                                         Progress bar
                         // download button
                         .btn-group.pull-right(role='group')
-                            form(method='get', action='/archive/recordings/download/' + locals.file + '.mp3')
-                                button.btn.btn-default(type='submit')
-                                    span.glyphicon.glyphicon-download-alt
+                            //-form(method='get', action='/archive/recordings/download/' + locals.file + '.mp3')
+                                //-button.btn.btn-primary.download(type='submit')
+                            a.btn.btn-primary.download(href='/archive/recordings/download/' + locals.file + '.mp3')
+                                span.glyphicon.glyphicon-download-alt
+                            a.btn.btn-primary(href='/archive/trim/' + locals.file)
+                                span.glyphicon.glyphicon-wrench
         // ! row
     // ! panel body
