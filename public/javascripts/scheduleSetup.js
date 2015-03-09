@@ -70,24 +70,32 @@ $("button#submit").on('click', function(e) {
     // bring form fields into one object
     var newSchedule = {
         'station' : $('.form-group.station select').val(),
+        'stationName' : $('.form-group.station select option:selected').html(),
         'start' : $('.form-group.datetime input').val(),
         'duration' : $('.form-group.duration select').val(),
         'description' : $('.form-group.description input').val()
     }
 
-    // use AJAX to post this to the addschedule service.
-    $.ajax({
-        type: 'POST',
-        data: newSchedule,
-        url: '/schedule/submit',
-        dataType: 'JSON'
-    }).done(function(res) {
-        // check for success (blank response)
-        if (res.msg === '') {
-            // clear input fields
-            $('.form-group input').val('');
-        } else {
-            window.alert('Something went wrong: ' + res.msg);
-        }
-    });
+    if (newSchedule.start === '') {
+        window.alert('Please enter a Start time');
+    } else if (newSchedule.description === '') {
+        window.alert('Please enter a Title');
+    } else {
+        // use AJAX to post this to the addschedule service.
+        $.ajax({
+            type: 'POST',
+            data: newSchedule,
+            url: '/schedule/submit',
+            dataType: 'JSON'
+        }).done(function(res) {
+            // check for success (blank response)
+            if (res.msg === '') {
+                // clear input fields
+                $('.form-group input').val('');
+            } else {
+                window.alert('Something went wrong: ' + res.msg);
+            }
+        });
+    }
+
 });

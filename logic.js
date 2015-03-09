@@ -33,7 +33,8 @@ function start() {
 
 function activate(schedule) {
     if (!expired(schedule)) {
-        console.log('Schedule with ID: ' + schedule._id + ' will be made active');
+
+        console.log('[Activate Schedule. id=' + schedule._id + ']');
 
         db.collection('stations').findById(schedule.station, function(err, station) {
             var rec = new Recorder(station, schedule);
@@ -66,39 +67,37 @@ function archive(recording) {
     var path = recording.path;
     var filename = recording.filename;
     var fileID = new ObjectID();
-    console.log(fileID);
 
     // WARNING: Callback Hell
     // probe file for metadata
     probe(path + filename, function getExtention(err, probeData) {
-        console.log(probeData);
-        extention = probeData.format.format_name;
+        //extention = probeData.format.format_name;
         // rename file to include appropriate extention
-        fs.rename(path + filename, path + filename + '.' + extention, function write(err) {
-            filename = filename + '.' + extention;
+        //fs.rename(path + filename, path + filename + '.' + extention, function write(err) {
+            //filename = filename + '.' + extention;
             // store file to gridFS collection in database
-            gs = db.gridStore(fileID, filename, 'w');
-            gs.open(function(err, gs) {
-                gs.writeFile(path + filename, function(err, gs) {
-                    gs.close(function() {
-                        // delete file from filesystem
-                        fs.unlink(path + filename);
-                        // File is stored, need to add information to Archive collection
-                        var document = {
-                            file: fileID,
-                            duration: recording.duration,
-                            dateAdded: recording.date,
-                            stationName: recording.stationName,
-                            views: 0,
-                            description: recording.description,
-                            tags: []};
-                        db.collection('archive').insert(document, function(err, record) {
-                            console.log('Record added as: ' + record[0]._id);
-                        });
+        gs = db.gridStore(fileID, filename, 'w');
+        gs.open(function(err, gs) {
+            gs.writeFile(path + filename, function(err, gs) {
+                gs.close(function() {
+                    // delete file from filesystem
+                    fs.unlink(path + filename);
+                    // File is stored, need to add information to Archive collection
+                    var document = {
+                        file: fileID,
+                        duration: recording.duration,
+                        dateAdded: recording.date,
+                        stationName: recording.stationName,
+                        views: 0,
+                        description: recording.description,
+                        tags: []};
+                    db.collection('archive').insert(document, function(err, record) {
+                        console.log('[File Archived. id=' + record[0]._id + ']');
                     });
                 });
             });
         });
+        //});
     });
 }
 

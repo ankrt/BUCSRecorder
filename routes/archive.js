@@ -4,11 +4,9 @@ var ObjectID = require('mongodb').ObjectID;
 var router = express.Router();
 
 var archiveItem = jade.compileFile('views/archiveItem.jade', {cache: true});
-//var archiveItem = jade.compileFile('views/archiveItem.jade');
-/*
- * render the data into html
- */
-interpolate = function(element) {
+
+/* render the data into html */
+function interpolateArchive(element) {
     return archiveItem(element);
 }
 
@@ -26,7 +24,7 @@ router.get('/', function(req, res) {
 router.get('/recordings', function(req, res) {
     var db = req.db;
     db.collection('archive').find().sort({_id: -1}).toArray(function(err, items) {
-        var html = items.map(interpolate);
+        var html = items.map(interpolateArchive);
         res.send(html.join('\n'));
     });
 });
@@ -148,7 +146,7 @@ router.post('/search', function(req, res) {
     var re = new RegExp('.*' + req.body.searchTerm + '.*', 'gi');
 
     db.collection('archive').find({description: re}).sort({_id: -1}).toArray(function(err, items) {
-        var html = items.map(interpolate);
+        var html = items.map(interpolateArchive);
         //console.log(res.req);
         res.json(html);
         //res.type('html').send(html.join('\n'));
