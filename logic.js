@@ -71,33 +71,34 @@ function archive(recording) {
     // WARNING: Callback Hell
     // probe file for metadata
     probe(path + filename, function getExtention(err, probeData) {
-        //extention = probeData.format.format_name;
-        // rename file to include appropriate extention
-        //fs.rename(path + filename, path + filename + '.' + extention, function write(err) {
-            //filename = filename + '.' + extention;
+        // get file format and add extention
+        var extention = probeData.format.format_name;
+        fs.rename(path + filename, path + filename + '.' + extention, function write(err) {
+            filename = filename + '.' + extention;
+
             // store file to gridFS collection in database
-        gs = db.gridStore(fileID, filename, 'w');
-        gs.open(function(err, gs) {
-            gs.writeFile(path + filename, function(err, gs) {
-                gs.close(function() {
-                    // delete file from filesystem
-                    fs.unlink(path + filename);
-                    // File is stored, need to add information to Archive collection
-                    var document = {
-                        file: fileID,
-                        duration: recording.duration,
-                        dateAdded: recording.date,
-                        stationName: recording.stationName,
-                        views: 0,
-                        description: recording.description,
-                        tags: []};
-                    db.collection('archive').insert(document, function(err, record) {
-                        console.log('[File Archived. id=' + record[0]._id + ']');
+            gs = db.gridStore(fileID, filename, 'w');
+            gs.open(function(err, gs) {
+                gs.writeFile(path + filename, function(err, gs) {
+                    gs.close(function() {
+                        // delete file from filesystem
+                        fs.unlink(path + filename);
+                        // File is stored, need to add information to Archive collection
+                        var document = {
+                            file: fileID,
+                            duration: recording.duration,
+                            dateAdded: recording.date,
+                            stationName: recording.stationName,
+                            views: 0,
+                            description: recording.description,
+                            tags: []};
+                        db.collection('archive').insert(document, function(err, record) {
+                            console.log('[File Archived. id=' + record[0]._id + ']');
+                        });
                     });
                 });
             });
         });
-        //});
     });
 }
 

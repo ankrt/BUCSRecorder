@@ -1,9 +1,15 @@
 var express = require('express');
 var jade = require('jade');
+var fs = require('fs');
+var path = require('path');
 var ObjectID = require('mongodb').ObjectID;
 var router = express.Router();
 
-var archiveItem = jade.compileFile('views/archiveItem.jade', {cache: true});
+//var archiveItem = jade.compileFile('views/archiveItem.jade', {cache: true});
+var archiveItem = jade.compile(fs.readFileSync('views/archiveItem.jade', 'utf-8'), {
+    basedir: __dirname,
+    pretty: true
+});
 
 /* render the data into html */
 function interpolateArchive(element) {

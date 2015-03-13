@@ -4,25 +4,29 @@ block content
     //-container for the whole page
     .container
         //-page title
-        h3= title
+        h3.page-header= title
 
         .row
-            .trimmer.col-sm-8.col-md-12
-                .timeline
-                    audio(src='/archive/recordings/download/#{file}.mp3' preload='metadata' data-bytes='#{bytes}')
-                    .Lslider
-                    .Rslider
-            p.start-time.
-                Start Time: 0
-            p.end-time.
-                End Time: ?
-            p.trim-duration.
-                Duration: ?
-            button.btn.btn-default.play-pause-toggle
-                span.glyphicon.glyphicon-play
-            //-button.btn.btn-default.download
-                //-span.glyphicon.glyphicon-download-alt
-            a.btn.btn-primary.download(href='/archive/recordings/download/' + locals.file + '.mp3')
-                span.glyphicon.glyphicon-download-alt
+        .panel.panel-default
+            .panel-heading
+                h4.panel-title Name of Recording
+            .panel-body
+                .trimmer.col-sm-12.col-lg-12
+                    .timeline
+                        audio(src='/archive/recordings/download/#{file}.mp3' preload='metadata' data-bytes='#{bytes}')
+                        .Lslider
+                        .Rslider
+        p.start-time.
+            Start Time: 0
+        p.end-time.
+            End Time: ?
+        p.trim-duration.
+            Duration: ?
+        button.btn.btn-default.play-pause-toggle
+            span.glyphicon.glyphicon-play
+        //-button.btn.btn-default.download
+            //-span.glyphicon.glyphicon-download-alt
+        a.btn.btn-primary.download(href='/archive/recordings/download/' + locals.file + '.mp3')
+            span.glyphicon.glyphicon-download-alt
 
     script(src='/javascripts/trim.js')

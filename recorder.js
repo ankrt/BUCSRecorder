@@ -16,7 +16,7 @@ function Recorder(station, schedule) {
         description: schedule.description,
         tags: [],
         path: './tmp/',
-        filename: uuid.v4() + '.mp3'
+        filename: uuid.v4()
     };
 }
 
@@ -47,30 +47,65 @@ function record(duration, streams, path, filename, callback) {
     var start = moment();
     var elapsed = 0;
     var url = streams[0];
-    //var re = /^http/i;
+    var re = /^http/i;
     var stream;
+    var ext = '';
 
     console.log('[Begin Recording. file=' + filename + ', duration=' + duration + ']');
 
     // set up for ffmpeg
-    var command = 'ffmpeg';
-    var args = [
-        '-i',
-        url,
-        '-t',
-        duration / 1000,
-        path + filename];
-    stream = spawn(command, args);
+    if (url.search(re) == 0) {
+        stream = request(url);
+    } else {
+        ext = '.mp3';
+        var command = 'ffmpeg';
+        var args = [
+            '-i',
+            url,
+            '-t',
+            duration / 1000,
+            path + filename];
+        stream = spawn(command, args);
+    }
 
-    // handle errors
-    stream.on('error', function(err) {
-        console.log('Error: ' + err.message);
+    // handle data event, only used in request based recording
+    stream.on('data', function(chunk) {
+        var now = moment();
+        elapsed = now.valueOf() - start.valueOf();
+
+        if (elapsed < duration) {
+            fs.appendFile(path + filename, chunk, function(err) {
+                if (err) {
+                    console.log('[ERROR. Could not write to file: ' + filename + ']');
+                }
+            });
+        } else {
+            stream.pause();
+            stream.emit('end');
+        }
     });
 
-    // run callback when stream closes
+    // handle end event, only used in request based recording
+    stream.on('end', function() {
+        stream.end();
+        stream.emit('close');
+    });
+
+    // handle errors, shared between ffmpeg and request based recording
+    stream.on('error', function(err) {
+        console.log('[ERROR. ' + err.message + ']');
+    });
+
+    // handle close event, shared between ffmpeg and request based recording
     stream.on('close', function() {
         console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
-        callback();
+        if (ext != '') {
+            // remove extention if it exists - makes it easier for logic to handle
+            fs.rename(pah + filename + ext, path+ filename, callback);
+        } else {
+            // otherwise just run the callback
+            callback();
+        }
     });
 }
 
