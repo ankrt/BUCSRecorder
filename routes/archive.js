@@ -5,11 +5,7 @@ var path = require('path');
 var ObjectID = require('mongodb').ObjectID;
 var router = express.Router();
 
-//var archiveItem = jade.compileFile('views/archiveItem.jade', {cache: true});
-var archiveItem = jade.compile(fs.readFileSync('views/archiveItem.jade', 'utf-8'), {
-    basedir: __dirname,
-    pretty: true
-});
+var archiveItem = jade.compileFile(__dirname + '/../views/archiveItem.jade', {cache: true});
 
 /* render the data into html */
 function interpolateArchive(element) {

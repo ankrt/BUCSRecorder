@@ -5,11 +5,8 @@ var fs = require('fs');
 var path = require('path');
 var router = express.Router();
 
-var upcomingRecording = jade.compileFile('views/upcomingRecording.jade', {cache: true});
-var upcomingRecording = jade.compile(fs.readFileSync('views/upcomingRecording.jade', 'utf-8'), {
-    basedir: __dirname,
-    pretty: true
-});
+var upcomingRecording = jade.compileFile(__dirname + '/../views/upcomingRecording.jade', {cache: true});
+
 /* This should be refactored away; it is used at least twice */
 function interpolateUpcoming(element) {
     return upcomingRecording(element);
