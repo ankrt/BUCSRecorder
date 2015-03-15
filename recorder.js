@@ -160,7 +160,6 @@ function uncontain(element, callback) {
     var re_url = /file\d*=(.*)\n*$/mi;
 
     if (re_m3u.test(element)) {
-        var res = sync_request('GET', element);
         request(element, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 // the request body is just the streaming url
