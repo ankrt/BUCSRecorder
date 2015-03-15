@@ -17,7 +17,7 @@ function Recorder(station, schedule) {
         duration: Number(schedule.duration),
         description: schedule.description,
         tags: [],
-        path: './tmp/',
+        path: '/tmp/',
         filename: uuid.v4()
     };
 }
@@ -90,7 +90,7 @@ function record(duration, streams, path, filename, callback) {
             console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
             if (ext != '') {
                 // remove extention if it exists - makes it easier for logic to handle
-                fs.rename(path + filename + ext, path+ filename, callback);
+                fs.rename(path + filename + ext, path + filename, callback);
             } else {
                 // otherwise just run the callback
                 callback();
@@ -117,7 +117,7 @@ function record(duration, streams, path, filename, callback) {
             console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
             if (ext != '') {
                 // remove extention if it exists - makes it easier for logic to handle
-                fs.rename(path + filename + ext, path+ filename, callback);
+                fs.rename(path + filename + ext, path + filename, callback);
             } else {
                 // otherwise just run the callback
                 callback();
