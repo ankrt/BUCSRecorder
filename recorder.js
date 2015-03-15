@@ -41,32 +41,10 @@ Recorder.prototype.activate = function(callback) {
             setTimeout(function() {
                 record(duration, results, path, filename, callback);
             }, wait.valueOf());
+        } else {
+            console.log('[ERROR. ' + err + ']');
         }
     });
-
-
-    //if (re_m3u.test(element)) {
-        //var res = sync_request('GET', element);
-        //if (res.statusCode == 200) {
-            //// the request body is just the streaming url
-            //var body = String(res.getBody());
-            //retval = body;
-        //}
-    //} else if (re_pls.test(element)) {
-        //var res = sync_request('GET', element);
-        //if (res.statusCode == 200) {
-            //// dig around for the url
-            //var body = String(res.getBody());
-            //var match = re_url.exec(body);
-            //if (match != null) {
-                //retval = match[1];
-            //}
-        //}
-    //}
-    // timer to start of recording
-    //setTimeout(function() {
-        //record(duration, streams, path, filename, callback);
-    //}, wait.valueOf());
 }
 
 /*
@@ -159,23 +137,34 @@ function uncontain(element, callback) {
 
     var re_url = /file\d*=(.*)\n*$/mi;
 
+
     if (re_m3u.test(element)) {
+        console.log('[Resolving m3u. url=' + element + ']');
         request(element, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 // the request body is just the streaming url
-                var body = String(body);
+                var body = String(body).replace(/(\r\n|\n|\r)/gm, '');
+                console.log('[Found. url=' + body + ']');
                 callback(null, body);
+            } else {
+                console.log('[ERROR. ' + err + ']');
             }
         });
     } else if (re_pls.test(element)) {
+        console.log('[Resolving pls. url=' + element + ']');
         request(element, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 // dig around for the url
                 var body = String(body);
                 var match = re_url.exec(body);
                 if (match != null) {
+                    console.log('[Found. url=' + match[1] + ']');
                     callback(null, match[1]);
+                } else {
+                    console.log('[ERROR. Could not extract url from file]');
                 }
+            } else {
+                console.log('[ERROR. ' + err + ']');
             }
         });
     }
