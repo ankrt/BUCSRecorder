@@ -18,7 +18,8 @@
     "node-ffprobe": "^1.2.2",
     "node-uuid": "^1.4.2",
     "request": "^2.51.0",
-    "serve-favicon": "^2.1.7"
+    "serve-favicon": "^2.1.7",
+    "sync-request": "^2.0.1"
   },
   "repository": {
     "type": "git",
