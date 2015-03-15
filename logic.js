@@ -69,36 +69,44 @@ function archive(recording) {
     var fileID = new ObjectID();
 
     // WARNING: Callback Hell
-    // probe file for metadata
-    probe(path + filename, function getExtention(err, probeData) {
-        // get file format and add extention
-        var extention = probeData.format.format_name;
-        fs.rename(path + filename, path + filename + '.' + extention, function write(err) {
-            filename = filename + '.' + extention;
+    // First check that the file exists!
+    fs.exists(path + filename, function(exists) {
+        if (exists) {
+            // probe file for metadata
+            probe(path + filename, function getExtention(err, probeData) {
+                // get file format and add extention
+                var extention = probeData.format.format_name;
+                fs.rename(path + filename, path + filename + '.' + extention, function write(err) {
+                    filename = filename + '.' + extention;
 
-            // store file to gridFS collection in database
-            gs = db.gridStore(fileID, filename, 'w');
-            gs.open(function(err, gs) {
-                gs.writeFile(path + filename, function(err, gs) {
-                    gs.close(function() {
-                        // delete file from filesystem
-                        fs.unlink(path + filename);
-                        // File is stored, need to add information to Archive collection
-                        var document = {
-                            file: fileID,
-                            duration: recording.duration,
-                            dateAdded: recording.date,
-                            stationName: recording.stationName,
-                            views: 0,
-                            description: recording.description,
-                            tags: []};
-                        db.collection('archive').insert(document, function(err, record) {
-                            console.log('[File Archived. id=' + record[0]._id + ']');
+                    // store file to gridFS collection in database
+                    gs = db.gridStore(fileID, filename, 'w');
+                    gs.open(function(err, gs) {
+                        gs.writeFile(path + filename, function(err, gs) {
+                            gs.close(function() {
+                                // delete file from filesystem
+                                fs.unlink(path + filename);
+                                // File is stored, need to add information to Archive collection
+                                var document = {
+                                    file: fileID,
+                                    duration: recording.duration,
+                                    dateAdded: recording.date,
+                                    stationName: recording.stationName,
+                                    views: 0,
+                                    description: recording.description,
+                                    tags: []};
+                                db.collection('archive').insert(document, function(err, record) {
+                                    console.log('[File Archived. id=' + record[0]._id + ']');
+                                });
+                            });
                         });
                     });
                 });
             });
-        });
+        } else {
+            // file does not exist, there was an error
+            console.log('[ERROR. File was not created and can not be archived]');
+        }
     });
 }
 

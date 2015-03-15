@@ -14,7 +14,7 @@ router.get('/', function(req, res) {
  */
 router.get('/stationList', function(req, res) {
     var db = req.db;
-    db.collection('stations').find().toArray(function(err, items) {
+    db.collection('stations').find().sort({name: 1}).toArray(function(err, items) {
         res.json(items);
     });
 });
