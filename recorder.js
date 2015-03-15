@@ -63,38 +63,39 @@ function record(duration, streams, path, filename, callback) {
     console.log('[Begin Recording. url=' + url + ', file=' + filename + ', duration=' + duration + ']');
 
     if (url.search(re) == 0) {
-        // Why did they change the API? It was much nicer before.
-        request
-            .get(url)
-            .on('data', function(chunk) {
-                var now = moment();
-                elapsed = now.valueOf() - start.valueOf();
+        stream = request({
+            url: url
+            //, proxy: 'http://wwwproxy.bath.ac.uk:3128'
+        });
+        stream.on('data', function(chunk) {
+            var now = moment();
+            elapsed = now.valueOf() - start.valueOf();
 
-                if (elapsed < duration) {
-                    fs.appendFile(path + filename, chunk, function(err) {
-                        if (err) {
-                            console.log('[ERROR. Could not write to file: ' + filename + ']');
-                        }
-                    });
-                } else {
-                    this.pause();
-                    this.emit('end');
-                }
-            })
-            .on('end', function() {
-                this.end();
-                this.emit('close');
-            })
-            .on('close', function() {
-                console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
-                if (ext != '') {
-                    // remove extention if it exists - makes it easier for logic to handle
-                    fs.rename(path + filename + ext, path+ filename, callback);
-                } else {
-                    // otherwise just run the callback
-                    callback();
-                }
-            })
+            if (elapsed < duration) {
+                fs.appendFile(path + filename, chunk, function(err) {
+                    if (err) {
+                        console.log('[ERROR. Could not write to file: ' + filename + ']');
+                    }
+                });
+            } else {
+                this.pause();
+                this.emit('end');
+            }
+        });
+        stream.on('end', function() {
+            this.end();
+            this.emit('close');
+        });
+        stream.on('close', function() {
+            console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
+            if (ext != '') {
+                // remove extention if it exists - makes it easier for logic to handle
+                fs.rename(path + filename + ext, path+ filename, callback);
+            } else {
+                // otherwise just run the callback
+                callback();
+            }
+        });
     } else {
         // set up for ffmpeg, which will handle anything other than http
         ext = '.mp3';
@@ -140,7 +141,10 @@ function uncontain(element, callback) {
 
     if (re_m3u.test(element)) {
         console.log('[Resolving m3u. url=' + element + ']');
-        request(element, function(err, res, body) {
+        request({
+            url: element
+            //, proxy: 'http://wwwproxy.bath.ac.uk:3128/'
+        }, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 // the request body is just the streaming url
                 var body = String(body).replace(/(\r\n|\n|\r)/gm, '');
@@ -152,7 +156,10 @@ function uncontain(element, callback) {
         });
     } else if (re_pls.test(element)) {
         console.log('[Resolving pls. url=' + element + ']');
-        request(element, function(err, res, body) {
+        request({
+            url: element
+            //, proxy: 'http://wwwproxy.bath.ac.uk:3128/'
+        }, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 // dig around for the url
                 var body = String(body);
