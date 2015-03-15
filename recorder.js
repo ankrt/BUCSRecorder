@@ -1,9 +1,9 @@
+var async = require('async');
 var fs = require('fs');
 var moment = require('moment');
 var uuid = require('node-uuid');
 var spawn = require('child_process').spawn;
 var request = require('request');
-var sync_request = require('sync-request');
 
 // constructor
 //function Recorder(streams, startTime, duration, description) {
@@ -36,13 +36,37 @@ Recorder.prototype.activate = function(callback) {
 
     // if url is a container format (m3u or pls) then
     // we need to request it first to get the actual streaming url
-    var tmp = streams.map(uncontain);
-    streams = tmp;
+    async.map(streams, uncontain, function(err, results) {
+        if (!err) {
+            setTimeout(function() {
+                record(duration, results, path, filename, callback);
+            }, wait.valueOf());
+        }
+    });
 
+
+    //if (re_m3u.test(element)) {
+        //var res = sync_request('GET', element);
+        //if (res.statusCode == 200) {
+            //// the request body is just the streaming url
+            //var body = String(res.getBody());
+            //retval = body;
+        //}
+    //} else if (re_pls.test(element)) {
+        //var res = sync_request('GET', element);
+        //if (res.statusCode == 200) {
+            //// dig around for the url
+            //var body = String(res.getBody());
+            //var match = re_url.exec(body);
+            //if (match != null) {
+                //retval = match[1];
+            //}
+        //}
+    //}
     // timer to start of recording
-    setTimeout(function() {
-        record(duration, streams, path, filename, callback);
-    }, wait.valueOf());
+    //setTimeout(function() {
+        //record(duration, streams, path, filename, callback);
+    //}, wait.valueOf());
 }
 
 /*
@@ -129,33 +153,33 @@ function record(duration, streams, path, filename, callback) {
  * m3u or pls, the actual streaming url can be obtained by
  * requesting the original url and reading the contents
  */
-function uncontain(element) {
-    var re_m3u = /.*(\.m3u)$/i;
-    var re_pls = /.*(\.pls)$/i;
+function uncontain(element, callback) {
+    var re_m3u = /.*(\.m3u)$/mi;
+    var re_pls = /.*(\.pls)$/mi;
 
     var re_url = /file\d*=(.*)\n*$/mi;
 
-    var retval = element;
-
     if (re_m3u.test(element)) {
         var res = sync_request('GET', element);
-        if (res.statusCode == 200) {
-            // the request body is just the streaming url
-            var body = String(res.getBody());
-            retval = body;
-        }
-    } else if (re_pls.test(element)) {
-        var res = sync_request('GET', element);
-        if (res.statusCode == 200) {
-            // dig around for the url
-            var body = String(res.getBody());
-            var match = re_url.exec(body);
-            if (match != null) {
-                retval = match[1];
+        request(element, function(err, res, body) {
+            if (!err && res.statusCode == 200) {
+                // the request body is just the streaming url
+                var body = String(body);
+                callback(null, body);
             }
-        }
+        });
+    } else if (re_pls.test(element)) {
+        request(element, function(err, res, body) {
+            if (!err && res.statusCode == 200) {
+                // dig around for the url
+                var body = String(body);
+                var match = re_url.exec(body);
+                if (match != null) {
+                    callback(null, match[1]);
+                }
+            }
+        });
     }
-    return retval;
 }
 
 // export the class
