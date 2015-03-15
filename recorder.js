@@ -60,9 +60,39 @@ function record(duration, streams, path, filename, callback) {
 
     console.log('[Begin Recording. url=' + url + ', file=' + filename + ', duration=' + duration + ']');
 
-    //if (re.test(url) == 0) {
-    if (false) {
-        stream = request(url);
+    if (url.search(re) == 0) {
+        // Why did they change the API? It was much nicer before.
+        request
+            .get(url)
+            .on('data', function(chunk) {
+                var now = moment();
+                elapsed = now.valueOf() - start.valueOf();
+
+                if (elapsed < duration) {
+                    fs.appendFile(path + filename, chunk, function(err) {
+                        if (err) {
+                            console.log('[ERROR. Could not write to file: ' + filename + ']');
+                        }
+                    });
+                } else {
+                    this.pause();
+                    this.emit('end');
+                }
+            })
+            .on('end', function() {
+                this.end();
+                this.emit('close');
+            })
+            .on('close', function() {
+                console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
+                if (ext != '') {
+                    // remove extention if it exists - makes it easier for logic to handle
+                    fs.rename(path + filename + ext, path+ filename, callback);
+                } else {
+                    // otherwise just run the callback
+                    callback();
+                }
+            })
     } else {
         // set up for ffmpeg, which will handle anything other than http
         ext = '.mp3';
@@ -74,52 +104,23 @@ function record(duration, streams, path, filename, callback) {
             duration / 1000,
             path + filename + ext];
         stream = spawn(command, args);
+
+        stream.on('error', function(err) {
+            console.log('[ERROR. ' + err.message + ']');
+        });
+
+        // handle close event, shared between ffmpeg and request based recording
+        stream.on('close', function() {
+            console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
+            if (ext != '') {
+                // remove extention if it exists - makes it easier for logic to handle
+                fs.rename(path + filename + ext, path+ filename, callback);
+            } else {
+                // otherwise just run the callback
+                callback();
+            }
+        });
     }
-
-    stream.stderr.on('data', function(data) {
-        console.log(String(data));
-    });
-
-    // handle data event, only used in request based recording
-    stream.on('data', function(chunk) {
-        console.log('received some data');
-        var now = moment();
-        elapsed = now.valueOf() - start.valueOf();
-
-        if (elapsed < duration) {
-            fs.appendFile(path + filename, chunk, function(err) {
-                if (err) {
-                    console.log('[ERROR. Could not write to file: ' + filename + ']');
-                }
-            });
-        } else {
-            stream.pause();
-            stream.emit('end');
-        }
-    });
-
-    // handle end event, only used in request based recording
-    stream.on('end', function() {
-        stream.end();
-        stream.emit('close');
-    });
-
-    // handle errors, shared between ffmpeg and request based recording
-    stream.on('error', function(err) {
-        console.log('[ERROR. ' + err.message + ']');
-    });
-
-    // handle close event, shared between ffmpeg and request based recording
-    stream.on('close', function() {
-        console.log('[End Recording. file=' + filename + ', duration=' + duration + ']');
-        if (ext != '') {
-            // remove extention if it exists - makes it easier for logic to handle
-            fs.rename(path + filename + ext, path+ filename, callback);
-        } else {
-            // otherwise just run the callback
-            callback();
-        }
-    });
 }
 
 /*
