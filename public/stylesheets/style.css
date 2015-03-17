@@ -38,6 +38,20 @@ a {
     padding: 5px;
 }
 
+.col-center-block {
+    float: none;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.col-center-block2 {
+    float: none;
+    display: block;
+    margin-left: 10px;
+    margin-right: auto;
+}
+
 .well#trimmer {
     background: transparent;
     border: none;
@@ -107,7 +121,8 @@ div.play-tracker {
     width: 11px;
     height: 30%;
     border-radius: 3px;
-    background: rgb(217, 83, 79);
+    /*background: rgb(217, 83, 79);*/
+    background: red;
     margin-top: 35px;
     margin-left: -6px;
 }
@@ -118,7 +133,8 @@ div.play-tracker-line {
     left: 0%;
     width: 1px;
     height: 100px;
-    background: rgb(217, 83, 79);
+    /*background: rgb(217, 83, 79);*/
+    background: red;
     margin-top: -35px;
     margin-left: 5px;
 }

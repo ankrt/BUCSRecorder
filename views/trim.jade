@@ -11,34 +11,44 @@ block content
             .panel-heading
                 h4.panel-title Name of Recording
             .panel-body
-                .well#trimmer
-                    .timeline
-                        audio(src='/archive/recordings/download/#{file}.mp3' preload='metadata' data-bytes='#{bytes}')
-                        .Ltrim-zone
-                        .Lslider
-                        .Rtrim-zone
-                        .Rslider
-                        .play-tracker
-                            .play-tracker-line
-                .col-xs-12.col-md-6.form-group
-                    .more-padding
-                        .well.row
+                .row
+                    .col-sm-11.col-md-11.col-lg-11.col-center-block
+                        .well#trimmer
+                            .timeline
+                                audio(src='/archive/recordings/download/#{file}.mp3' preload='metadata' data-bytes='#{bytes}')
+                                .Ltrim-zone
+                                .Lslider
+                                .Rtrim-zone
+                                .Rslider
+                                .play-tracker
+                                    .play-tracker-line
+                .row.col-sm-12.col-md-12.col-lg-12.col-center-block
+                    .col-xs-12.col-md-6
+                        .well.well-lg.row
                             .col-xs-6.col-sm-6
                                 p.total-duration.
                                     Total Duration: ?
-                                p.trim-duration.
-                                    Trim Duration: ?
-                            .col-xs-6.col-sm-6
                                 p.trim-start-time.
                                     Trim Start: 0
+                            .col-xs-6.col-sm-6
+                                p.trim-duration.
+                                    Trim Duration: ?
                                 p.trim-end-time.
                                     Trim End: ?
-                .col-xs-12.col-md-6.form-group
-                    .more-padding
-                        .well.row
-                            button.btn.btn-default.play-pause-toggle
-                                span.glyphicon.glyphicon-play
-                            a.btn.btn-primary.download(href='/archive/recordings/download/' + locals.file + '.mp3')
-                                span.glyphicon.glyphicon-download-alt
+                    .col-xs-12.col-md-5.col-md-offset-1.form-group
+                        .well.well-lg.row
+                            .col-xs-9.col-md-9
+                                .btn-group.btn-group-lg(role='group')
+                                    button.btn.btn-lg.btn-default.play-pause-toggle
+                                        span.glyphicon.glyphicon-play
+                                    button.btn.btn-lg.btn-default.reset
+                                        span.glyphicon.glyphicon-stop
+                                    button.btn.btn-lg.btn-default.volume-down
+                                        span.glyphicon.glyphicon-volume-down
+                                    button.btn.btn-lg.btn-default.volume-up
+                                        span.glyphicon.glyphicon-volume-up
+                            .col-xs-3.col-md-3
+                                a.btn.btn-lg.btn-primary.col-center-block.download(href='/archive/recordings/download/' + locals.file + '.mp3')
+                                    span.glyphicon.glyphicon-download-alt
 
     script(src='/javascripts/trim.js')
