@@ -22,7 +22,6 @@ a {
     background: transparent;
 }
 
-
 #recording-list .progress {
     margin-bottom: 0;
     height: 32px;
@@ -34,6 +33,20 @@ a {
     margin-bottom: 0;
 }
 
+.more-padding {
+    margin: 5px;
+    padding: 5px;
+}
+
+.well#trimmer {
+    background: transparent;
+    border: none;
+    webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    -o-box-shadow: none;
+    box-shadow: none;
+}
+
 div.trimmer {
     /*width: 500px;*/
     /*height: 150px;*/
@@ -43,11 +56,12 @@ div.trimmer {
 }
 
 div.timeline {
+    position: relative;
     width: 100%;
     height: 100px;
     float: center;
     /*border: solid;*/
-    background: rgba(0,0,0,.3);
+    background: rgb(245,245,248);
 }
 
 div.Lslider {
@@ -56,7 +70,16 @@ div.Lslider {
     right: 100%;
 	width: 10px;
 	height: 110%;
-	background: red;
+    background: rgb(51,122,183);
+}
+
+div.Ltrim-zone {
+    position: absolute;
+    float: left;
+    left: 0%;
+    width: 0%;
+    height: 100%;
+    background: rgba(51,122,183,0.5);
 }
 
 div.Rslider {
@@ -65,5 +88,37 @@ div.Rslider {
     left: 100%;
 	width: 10px;
 	height: 110%;
-	background: green;
+    background: rgb(40,96,144);
+}
+
+div.Rtrim-zone {
+    position: absolute;
+    float: right;
+    right: 0%;
+    width: 0%;
+    height: 100%;
+    background: rgba(40,96,144, 0.5);
+}
+
+div.play-tracker {
+    position: absolute;
+    float: left;
+    left: 0%;
+    width: 11px;
+    height: 30%;
+    border-radius: 3px;
+    background: rgb(217, 83, 79);
+    margin-top: 35px;
+    margin-left: -6px;
+}
+
+div.play-tracker-line {
+    position: absolute;
+    float: left;
+    left: 0%;
+    width: 1px;
+    height: 100px;
+    background: rgb(217, 83, 79);
+    margin-top: -35px;
+    margin-left: 5px;
 }

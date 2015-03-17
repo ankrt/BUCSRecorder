@@ -1,21 +1,30 @@
 var timeline = $('.timeline');
 var Lslider = $('.Lslider');
 var Rslider = $('.Rslider');
+var LtrimZone = $('.Ltrim-zone');
+var RtrimZone = $('.Rtrim-zone');
 var audio = $('audio')[0];
-var duration = 0;
-var startTime = 0;
-var endTime = 0;
+var totalDuration = 0;
+var trimStartTime = 0;
+var trimEndTime = 0;
 
 var Lactive = false;
 var Ractive = false;
 
-// When the metadata has loaded, update the duration of the track
+/*
+ * When the metadata has loaded, update the totalDuration of the track
+ */
 $('audio').on('loadedmetadata', function() {
-    duration = $(this)[0].duration;
-    endTime = duration;
+    totalDuration = $(this)[0].duration;
+    trimEndTime = totalDuration;
     updateEndTime();
+    updateTotalDuraton();
 });
 
+/*
+ * Toggle between play and pause icons in the
+ * play/pause button
+ */
 $('button.play-pause-toggle').on('click', function() {
     var me = $(this); // only used within callbacks
     var paused = audio.paused;
@@ -32,8 +41,26 @@ $('button.play-pause-toggle').on('click', function() {
     }
 });
 
+/*
+ * Advance the play tracker on timeupdate events
+ */
+$('audio').on('timeupdate', function(event) {
 
-// do stuff when the sliders are moved
+    // calculate the current time as a percentage of track length
+    var currentTime_pcnt = (audio.currentTime / audio.duration) * 100;
+    // move the play tracker to the position that is this percentage along the timeline
+    $('.play-tracker').css('left', Math.round(currentTime_pcnt));
+
+    //console.log(currentTime_pcnt);
+});
+
+
+
+/*
+ * On mousedown event, the code listens for mouse movement
+ * and moves the slider with the mouse
+ * On mouseup, sliders must stop moving and listeners are removed
+ */
 Lslider.on('mousedown', LmouseDown);
 Rslider.on('mousedown', RmouseDown);
 $(window).on('mouseup', mouseUp);
@@ -64,78 +91,93 @@ function mouseUp(event) {
 
 function moveLeftSlider(event) {
 
-    // offset of mouse relative to timeline, in percent
-    var newPosLeft = ((event.pageX - timeline.offset().left) / timeline.width()) * 100;
-    var fixedPosLeft = 0;
+    // calculate the offset of mouse relative to timeline, in percent
+    var newPosLeft_pcnt = ((event.pageX - timeline.offset().left) / timeline.width()) * 100;
+    var fixedPosLeft_pcnt = 0;
     // position of the other slider, in percent
-    var posOtherSlider = ((Rslider.offset().left - timeline.offset().left) / timeline.width()) * 100;
+    var posOtherSlider_pcnt = ((Rslider.offset().left - timeline.offset().left) / timeline.width()) * 100;
 
     // move the slider, but keep within allowable constraints
-    if (newPosLeft >= 0 && newPosLeft <= timeline.width()) {
-        fixedPosLeft = 100 - newPosLeft;
-        Lslider.css('right', fixedPosLeft + '%');
+    if (newPosLeft_pcnt >= 0 && newPosLeft_pcnt <= 100) {
+        fixedPosLeft_pcnt = 100 - newPosLeft_pcnt;
+        Lslider.css('right', fixedPosLeft_pcnt + '%');
     }
-    if (newPosLeft < 0) {
-        fixedPosLeft = 100;
-        Lslider.css('right', fixedPosLeft + '%');
+    if (newPosLeft_pcnt < 0) {
+        fixedPosLeft_pcnt = 100;
+        Lslider.css('right', fixedPosLeft_pcnt + '%');
     }
-    if (newPosLeft > posOtherSlider) {
-        fixedPosLeft = 100 - posOtherSlider;
-        Lslider.css('right', fixedPosLeft + '%');
+    if (newPosLeft_pcnt > posOtherSlider_pcnt) {
+        fixedPosLeft_pcnt = 100 - posOtherSlider_pcnt;
+        Lslider.css('right', fixedPosLeft_pcnt + '%');
     }
 
+    // finally, change the width of the Ltrim-zone so it
+    // fills from the left up to the Lslider
+    var trimZoneWidth = 100 - fixedPosLeft_pcnt;
+    LtrimZone.css('width', trimZoneWidth + '%');
+
     // update the start/end times of the audio
-    startTime = ((100 - fixedPosLeft) / 100) * duration;
+    trimStartTime = ((100 - fixedPosLeft_pcnt) / 100) * totalDuration;
     updateStartTime();
 }
 
 
 function moveRightSlider(event) {
-    // offset of mouse relative to timeline, in percent
-    var newPosLeft = ((event.pageX - timeline.offset().left) / timeline.width()) * 100;
-    var fixedPosRight = 0;
+
+    // calculate offset of mouse relative to timeline, in percent
+    var newPosLeft_pcnt = ((event.pageX - timeline.offset().left) / timeline.width()) * 100;
+    var fixedPosRight_pcnt = 0;
     // position of the other slider, in percent
-    var posOtherSlider = ((Lslider.offset().left - timeline.offset().left + Lslider.width()) / timeline.width()) * 100;
+    var posOtherSlider_pcnt = ((Lslider.offset().left - timeline.offset().left + Lslider.width()) / timeline.width()) * 100;
 
     // move the slider, but keep within allowable constraints
-    if (newPosLeft >= 0 && newPosLeft <= timeline.width()) {
-        fixedPosRight = newPosLeft;
-        Rslider.css('left', fixedPosRight + '%');
+    if (newPosLeft_pcnt >= 0 && newPosLeft_pcnt <= timeline.width()) {
+        fixedPosRight_pcnt = newPosLeft_pcnt;
+        Rslider.css('left', fixedPosRight_pcnt + '%');
     }
-    if (newPosLeft < posOtherSlider) {
-        fixedPosRight = posOtherSlider;
-        Rslider.css('left', fixedPosRight + '%');
+    if (newPosLeft_pcnt < posOtherSlider_pcnt) {
+        fixedPosRight_pcnt = posOtherSlider_pcnt;
+        Rslider.css('left', fixedPosRight_pcnt + '%');
     }
-    if (newPosLeft > 100) {
-        fixedPosRight = 100;
-        Rslider.css('left', fixedPosRight + '%');
+    if (newPosLeft_pcnt > 100) {
+        fixedPosRight_pcnt = 100;
+        Rslider.css('left', fixedPosRight_pcnt + '%');
     }
 
+    // finally, change the width of the Ltrim-zone so it
+    // fills from the left up to the Lslider
+    var trimZoneWidth = 100 - fixedPosRight_pcnt;
+    RtrimZone.css('width', trimZoneWidth + '%');
+
     // update the start/end times of the audio
-    endTime = (fixedPosRight / 100) * duration;
+    trimEndTime = (fixedPosRight_pcnt / 100) * totalDuration;
     updateEndTime();
 }
 
 function updateStartTime() {
-    $('.start-time').html('Start Time: ' + Math.round(startTime));
+    $('.trim-start-time').html('Trim Start: ' + Math.round(trimStartTime));
     updateTrimDuration();
 }
 
 function updateEndTime() {
-    $('.end-time').html('End Time: ' + Math.round(endTime));
+    $('.trim-end-time').html('Trim End: ' + Math.round(trimEndTime));
     updateTrimDuration();
 }
 
 function updateTrimDuration() {
-    $('.trim-duration').html('Trim Duration: ' + Math.round(endTime - startTime));
+    $('.trim-duration').html('Trim Duration: ' + Math.round(trimEndTime - trimStartTime));
+}
+
+function updateTotalDuraton() {
+    $('.total-duration').html('Total Duration: ' + Math.round(totalDuration));
 }
 
 function updateByteRange() {
     // total length of the file in bytes
     var bytes = $('audio').attr('data-bytes');
-    // start and end, as fractions of the duration
-    var startFrac = startTime / duration;
-    var endFrac = endTime / duration;
+    // start and end, as fractions of the totalDuration
+    var startFrac = trimStartTime / totalDuration;
+    var endFrac = trimEndTime / totalDuration;
 
     var startBytes = Math.floor(startFrac * bytes);
     var endBytes = Math.floor(endFrac * bytes);

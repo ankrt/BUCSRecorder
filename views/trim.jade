@@ -6,27 +6,39 @@ block content
         //-page title
         h3.page-header= title
 
-        .row
+        //-.row
         .panel.panel-default
             .panel-heading
                 h4.panel-title Name of Recording
             .panel-body
-                .trimmer.col-sm-12.col-lg-12
+                .well#trimmer
                     .timeline
                         audio(src='/archive/recordings/download/#{file}.mp3' preload='metadata' data-bytes='#{bytes}')
+                        .Ltrim-zone
                         .Lslider
+                        .Rtrim-zone
                         .Rslider
-        p.start-time.
-            Start Time: 0
-        p.end-time.
-            End Time: ?
-        p.trim-duration.
-            Duration: ?
-        button.btn.btn-default.play-pause-toggle
-            span.glyphicon.glyphicon-play
-        //-button.btn.btn-default.download
-            //-span.glyphicon.glyphicon-download-alt
-        a.btn.btn-primary.download(href='/archive/recordings/download/' + locals.file + '.mp3')
-            span.glyphicon.glyphicon-download-alt
+                        .play-tracker
+                            .play-tracker-line
+                .col-xs-12.col-md-6.form-group
+                    .more-padding
+                        .well.row
+                            .col-xs-6.col-sm-6
+                                p.total-duration.
+                                    Total Duration: ?
+                                p.trim-duration.
+                                    Trim Duration: ?
+                            .col-xs-6.col-sm-6
+                                p.trim-start-time.
+                                    Trim Start: 0
+                                p.trim-end-time.
+                                    Trim End: ?
+                .col-xs-12.col-md-6.form-group
+                    .more-padding
+                        .well.row
+                            button.btn.btn-default.play-pause-toggle
+                                span.glyphicon.glyphicon-play
+                            a.btn.btn-primary.download(href='/archive/recordings/download/' + locals.file + '.mp3')
+                                span.glyphicon.glyphicon-download-alt
 
     script(src='/javascripts/trim.js')
