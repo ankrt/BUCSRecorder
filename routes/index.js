@@ -28,7 +28,7 @@ router.get('/upcoming', function(req, res) {
     var now = moment();
 
     // get schedule items sorted by date descending
-    db.collection('schedule').find().sort({start: -1}).toArray(function(err, items) {
+    db.collection('schedule').find().sort({start: 1}).toArray(function(err, items) {
         // select only items with date that is in future
         var upcomingItems = [];
         for (i = 0; i < items.length; i++) {

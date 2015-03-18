@@ -54,7 +54,6 @@ $("button#submit").on('click', function(e) {
         'description' : $('.form-group.description input').val()
     }
 
-    window.alert(moment(newSchedule.start, 'DD/MM/YYYY HH:mm'));
 
     if (newSchedule.start === '') {
         window.alert('Please enter a Start time');
