@@ -9,12 +9,12 @@ var trimStartTime = 0;
 var trimEndTime = 0;
 
 // store the percentage that the play tracker should move to
-// when mouseup event occurs
-var audioStartingPercentage = 0;
-var audioSkipToPercentage = 0;
+// when mouseup event occurs. Cannot use positions of sliders
+// because they are relative to the left/right of the timeline
+var audioStart_pcnt = 0;
 // store the maximum percentage the audio should be allowed to reach
 // updated by moving the right slider
-var audioMaxPercentage = 100;
+var audioEnd_pcnt = 100;
 
 var Lactive = false;
 var Ractive = false;
@@ -40,10 +40,8 @@ $('button.play-pause-toggle').on('click', function() {
     }
 });
 $('button.reset').on('click', function() {
-    if (audio.playing) {
-        audio.pause();
-    }
-    changeCurrentTime(audioStartingPercentage);
+    audio.pause();
+    changeCurrentTime(audioStart_pcnt);
 });
 $('button.volume-down').on('click', function() {
     // decrement the volume
@@ -78,6 +76,24 @@ $('button.volume-up').on('click', function() {
 });
 
 /*
+ * Clicking on the timeline should move the play-tracker that
+ * point in the audio. Only areas within the bounds of the sliders
+ * should cause a response
+ */
+$('.timeline').on('click', function(event) {
+    var me = $(this);
+    var posLSlider_pcnt = ((Lslider.offset().left - timeline.offset().left + Lslider.width()) / timeline.width()) * 100;
+    var posRSlider_pcnt = ((Rslider.offset().left - timeline.offset().left) / timeline.width()) * 100;
+    var posClickPoint_pcnt = ((event.pageX - me.offset().left) / me.width()) * 100;
+
+    // check if point is within the sliders
+    if (posClickPoint_pcnt > posLSlider_pcnt + 1 && posClickPoint_pcnt < posRSlider_pcnt - 1) {
+        changeCurrentTime(posClickPoint_pcnt);
+    }
+
+});
+
+/*
  * Advance the play tracker on timeupdate events
  */
 $('audio').on('timeupdate', function(event) {
@@ -85,10 +101,11 @@ $('audio').on('timeupdate', function(event) {
     var currentTime_pcnt = (audio.currentTime / audio.duration) * 100;
     // move the play tracker to the position that is this percentage along the timeline
     $('.play-tracker').css('left', currentTime_pcnt + '%');
+    $('.current-time-counter').html('<h5>' + toMinutes(audio.currentTime) + '</h5>');
     // pause the audio if it has gone beyond the right slider and reset
-    if (currentTime_pcnt > audioMaxPercentage) {
+    if (currentTime_pcnt > audioEnd_pcnt) {
         audio.pause();
-        changeCurrentTime(audioStartingPercentage);
+        changeCurrentTime(audioStart_pcnt);
     }
 });
 
@@ -131,14 +148,12 @@ function RmouseDown() {
 function mouseUp(event) {
     if (Lactive) {
         moveLeftSlider(event);
-        if (audio.playing) {
-            audio.pause();
-        }
-        // some bugs to iron out here... moving slider while playing etc
-        changeCurrentTime(audioStartingPercentage);
+        changeCurrentTime(audioStart_pcnt);
         $(window).off('mousemove', moveLeftSlider);
-    } else if (Ractive) {
+    }
+    if (Ractive) {
         moveRightSlider(event);
+        changeCurrentTime(audioStart_pcnt);
         $(window).off('mousemove', moveRightSlider);
     }
     Lactive = false;
@@ -162,7 +177,8 @@ function moveLeftSlider(event) {
     } else if (newPosLeft_pcnt < 0) {
         fixedPosLeft_pcnt = 100;
         Lslider.css('right', fixedPosLeft_pcnt + '%');
-    } else if (newPosLeft_pcnt > posOtherSlider_pcnt) {
+    }
+    if (newPosLeft_pcnt > posOtherSlider_pcnt) {
         fixedPosLeft_pcnt = 100 - posOtherSlider_pcnt;
         Lslider.css('right', fixedPosLeft_pcnt + '%');
     }
@@ -175,7 +191,7 @@ function moveLeftSlider(event) {
     // change the currentTime of the audio so that the play tracker
     // moves to the new position of the slider, this is the same as the
     // trimZoneWidth
-    audioStartingPercentage = trimZoneWidth;
+    audioStart_pcnt = trimZoneWidth;
 
     // update the start/end times of the audio
     trimStartTime = ((100 - fixedPosLeft_pcnt) / 100) * totalDuration;
@@ -211,7 +227,7 @@ function moveRightSlider(event) {
     RtrimZone.css('width', trimZoneWidth + '%');
 
     // change the max percentage the track should reach when playing
-    audioMaxPercentage = fixedPosRight_pcnt;
+    audioEnd_pcnt = fixedPosRight_pcnt;
 
     // update the start/end times of the audio
     trimEndTime = (fixedPosRight_pcnt / 100) * totalDuration;
@@ -219,21 +235,21 @@ function moveRightSlider(event) {
 }
 
 function updateStartTime() {
-    $('.trim-start-time').html('Trim Start: ' + Math.round(trimStartTime));
+    $('.trim-start-time').html('Trim Start: ' + toMinutes(trimStartTime));
     updateTrimDuration();
 }
 
 function updateEndTime() {
-    $('.trim-end-time').html('Trim End: ' + Math.round(trimEndTime));
+    $('.trim-end-time').html('Trim End: ' + toMinutes(trimEndTime));
     updateTrimDuration();
 }
 
 function updateTrimDuration() {
-    $('.trim-duration').html('Trim Duration: ' + Math.round(trimEndTime - trimStartTime));
+    $('.trim-duration').html('Trim Duration: ' + toMinutes(trimEndTime - trimStartTime));
 }
 
 function updateTotalDuraton() {
-    $('.total-duration').html('Total Duration: ' + Math.round(totalDuration));
+    $('.total-duration').html('Total Duration: ' + toMinutes(totalDuration));
 }
 
 function updateByteRange() {
@@ -256,4 +272,11 @@ function changeCurrentTime(percentage) {
         audio.pause();
     }
     audio.currentTime = audio.duration * (percentage / 100);
+}
+
+function toMinutes(n) {
+    var totalSeconds = parseInt(Math.round(n));
+    var minutes = Math.floor(totalSeconds / 60);
+    var seconds = totalSeconds % 60;
+    return ('00' + minutes).slice(-2) + ':' + ('00' + seconds).slice(-2);
 }

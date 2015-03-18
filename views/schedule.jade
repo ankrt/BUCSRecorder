@@ -18,7 +18,7 @@ block content
                                 .form-group.datetime
                                     label(for='start') Start date/time
                                     .input-group.date
-                                        input.form-control(type='text', data-date-format='DD/MM/YYYY HH:mm', placeholder='dd/mm/yyyy hh:mm')
+                                        input.form-control(type='text', data-date-format='DD/MM/YYYY HH:mm', placeholder='pick a date and time')
                                         span.input-group-addon
                                             span.glyphicon-calendar.glyphicon
                                 .form-group.duration
@@ -34,7 +34,7 @@ block content
                             //-end column
             .btn-toolbar.actions
                 button.btn.btn-primary.pull-right#submit Submit
-                button.btn.btn-default.pull-right.add.disabled(onclick='rec.addForm()') Add
+                //-button.btn.btn-default.pull-right.add.disabled(onclick='rec.addForm()') Add
 
 
     script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js')

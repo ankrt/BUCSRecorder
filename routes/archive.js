@@ -86,8 +86,8 @@ router.get('/recordings/download/:id.mp3?', function(req, res) {
     var ranges = {};// = desiredRanges(req.headers);
     // get byte range from headers unless explicitly defined
     // in the url
-    console.log(req.query.startBytes);
-    console.log(req.query.endBytes);
+    //console.log(req.query.startBytes);
+    //console.log(req.query.endBytes);
 
     if(req.query.startBytes != undefined && req.query.endBytes != undefined) {
         ranges = {
@@ -166,14 +166,26 @@ router.get('/trim/:id', function(req, res) {
     var id = req.params.id;
     var len = 0;
 
-    // Get the size of the file in bytes...
-    // can use this to work out which byte ranges to download
-    var gs = db.gridStore(ObjectID(id), 'r');
-    gs.open(function() {
-        len = gs._native.length;
-        gs.close(function() {
-            res.render('trim', {title : 'Trimmer', 'file' : id, 'bytes' : len})
-        });
+    // Get the title of the recording and the station it was recorded from
+    db.collection('archive').find({file: ObjectID(id)}).toArray(function(err, items) {
+        // There should only be one file per archive item
+        var stationName = items[0].stationName;
+        var recordingName = items[0].description;
+        // Get the size of the file in bytes...
+        // can use this to work out which byte ranges to download
+        var gs = db.gridStore(ObjectID(id), 'r');
+        gs.open(function() {
+            len = gs._native.length;
+            gs.close(function() {
+                res.render('trim', {
+                    title : 'Trimmer',
+                    'file' : id,
+                    'bytes' : len,
+                    'stationName' : stationName,
+                    'recordingName': recordingName
+                });
+            });
+    });
     });
 });
 

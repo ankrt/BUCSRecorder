@@ -138,3 +138,22 @@ div.play-tracker-line {
     margin-top: -35px;
     margin-left: 5px;
 }
+
+div.current-time-counter {
+    position: absolute;
+    float: right;
+    right: 0%;
+    background: rgb(245,245,248);
+    -webkit-border-radius: 0px 0px 0px 5px;
+    -moz-border-radius: 0px 0px 0px 5px;
+    border-radius: 0px 0px 0px 5px;
+    /*height: 20px;*/
+}
+
+.restrict-height {
+    height: 96px;
+}
+
+.clickable {
+    cursor: pointer;
+}

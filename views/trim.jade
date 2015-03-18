@@ -9,34 +9,42 @@ block content
         //-.row
         .panel.panel-default
             .panel-heading
-                h4.panel-title Name of Recording
+                h4.panel-title
+                    b.
+                        #{recordingName} &nbsp;
+                    //-small.
+                    //-from &nbsp;
+                    em.
+                        #{stationName}
             .panel-body
                 .row
                     .col-sm-11.col-md-11.col-lg-11.col-center-block
                         .well#trimmer
-                            .timeline
+                            .timeline.clickable
                                 audio(src='/archive/recordings/download/#{file}.mp3' preload='metadata' data-bytes='#{bytes}')
                                 .Ltrim-zone
-                                .Lslider
+                                .Lslider.clickable
                                 .Rtrim-zone
-                                .Rslider
+                                .Rslider.clickable
                                 .play-tracker
                                     .play-tracker-line
+                                .current-time-counter
+                                    .h5
                 .row.col-sm-12.col-md-12.col-lg-12.col-center-block
                     .col-xs-12.col-md-6
-                        .well.well-lg.row
+                        .well.well-lg.row.restrict-height
                             .col-xs-6.col-sm-6
                                 p.total-duration.
                                     Total Duration: ?
                                 p.trim-start-time.
-                                    Trim Start: 0
+                                    Trim Start: 00:00
                             .col-xs-6.col-sm-6
                                 p.trim-duration.
                                     Trim Duration: ?
                                 p.trim-end-time.
                                     Trim End: ?
                     .col-xs-12.col-md-5.col-md-offset-1.form-group
-                        .well.well-lg.row
+                        .well.well-lg.row.restrict-height
                             .col-xs-9.col-md-9
                                 .btn-group.btn-group-lg(role='group')
                                     button.btn.btn-lg.btn-default.play-pause-toggle
