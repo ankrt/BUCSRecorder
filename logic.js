@@ -159,7 +159,9 @@ function archive(recording) {
             });
         }
     ], function(err, result) {
-        console.log('[File Archived. id=' + result + ']');
+        if (!err) {
+            console.log('[File Archived. id=' + result + ']');
+        }
     });
 }
 

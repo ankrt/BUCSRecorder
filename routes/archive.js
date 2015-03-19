@@ -62,7 +62,7 @@ router.get('/recordings/stream/:id.mp3', function(req, res) {
                     'Content-Type': 'audio/mpeg',
                     'Content-Length': String(len),
                     'Content-Range': 'bytes ' + String(ranges.start) + '-' + String(ranges.end) + '/' + String(gs._native.length),
-                    'Accept-Ranges': 'byte'
+                    'Accept-Ranges': 'bytes'
                 };
                 // Set the status code to:
                 //  - 206 if data is partial
@@ -122,7 +122,7 @@ router.get('/recordings/download/:id.mp3?', function(req, res) {
                     'Content-Length': String(len),
                     'Content-Range': 'bytes ' + String(ranges.start) + '-' + String(ranges.end) + '/' + String(gs._native.length),
                     'Content-Disposition': 'attachment',
-                    'Accept-Ranges': 'byte'
+                    'Accept-Ranges': 'bytes'
                 };
                 // Set the status code to:
                 //  - 206 if data is partial

@@ -21,7 +21,7 @@ block content
                     .col-sm-11.col-md-11.col-lg-11.col-center-block
                         .well#trimmer
                             .timeline.clickable
-                                audio(src='/archive/recordings/download/#{file}.mp3' preload='metadata' data-bytes='#{bytes}')
+                                audio(src='/archive/recordings/stream/#{file}.mp3', preload='metadata', data-bytes='#{bytes}', type='audio/mpeg')
                                 .Ltrim-zone
                                 .Lslider.clickable
                                 .Rtrim-zone
