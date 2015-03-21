@@ -23,7 +23,6 @@ var Ractive = false;
  * When the metadata has loaded, update the totalDuration of the track
  */
 $('audio').on('loadedmetadata', function() {
-    console.log($(this)[0].duration);
     totalDuration = $(this)[0].duration;
     trimEndTime = totalDuration;
     updateEndTime();
@@ -272,9 +271,7 @@ function changeCurrentTime(percentage) {
     if (audio.playing) {
         audio.pause();
     }
-    var test = audio.duration * (percentage / 100);
-    console.log(audio.duration);
-    audio.currentTime = test;
+    audio.currentTime = audio.duration * (percentage / 100);
 }
 
 function toMinutes(n) {

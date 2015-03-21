@@ -36,10 +36,10 @@ Recorder.prototype.activate = function(callback) {
 
     // if url is a container format (m3u or pls) then
     // we need to request it first to get the actual streaming url
-    async.map(streams, uncontain, function(err, results) {
+    async.map(streams, uncontain, function(err, streams) {
         if (!err) {
             setTimeout(function() {
-                record(duration, results, path, filename, callback);
+                record(duration, streams, path, filename, callback);
             }, wait.valueOf());
         } else {
             console.log('[ERROR. ' + err + ']');
