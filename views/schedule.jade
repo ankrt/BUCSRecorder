@@ -30,7 +30,12 @@ block content
                                 .form-group.description
                                     label(for='description') Title
                                     input.form-control
-                                .form-group.form-actions
+                                //-.form-group.teaching-purposes
+                                label Additional Informaiton
+                                .checkbox
+                                    label
+                                        input(type='checkbox' name='for-teaching-purposes' value='true')
+                                        |This recording will be used for teaching purposes
                             //-end column
             .btn-toolbar.actions
                 button.btn.btn-primary.pull-right#submit Submit

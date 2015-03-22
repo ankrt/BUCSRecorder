@@ -17,6 +17,7 @@ function Recorder(station, schedule) {
         duration: Number(schedule.duration),
         description: schedule.description,
         tags: [],
+        usedForTeaching: schedule.usedForTeaching,
         path: '/tmp/',
         filename: uuid.v4()
     };

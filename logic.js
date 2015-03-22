@@ -13,11 +13,12 @@ function Logic() {
 
 start();
 
+/*
+ * Start tailable cursor on the schedule collection
+ * Each valid schedule is activated
+ */
 function start() {
-
-    // start tailable cursor on schedule collection
     db.collection('schedule', function(err, collection) {
-
         var cursorOptions = {
             tailable: true,
             awaitdata: true,
@@ -146,7 +147,8 @@ function archive(recording) {
                 stationName: recording.stationName,
                 views: 0,
                 description: recording.description,
-                tags: []
+                tags: [],
+                usedForTeaching: recording.usedForTeaching
             };
 
             db.collection('archive').insert(document, function(err, record) {

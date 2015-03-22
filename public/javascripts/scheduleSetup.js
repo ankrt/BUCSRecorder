@@ -1,3 +1,4 @@
+var selectableDurations = [1, 10, 20, 30, 60, 90, 120, 180, 240, 300, 360];
 
 // DOM Ready
 //$(document).ready(function() {
@@ -22,8 +23,8 @@ rec.initForm = function() {
     // durations
     durationOptions = '';
 
-    for (i = 1; i < 61; i++) {
-        durationOptions += '<option>' + i + '</option>';
+    for (var i = 0; i < selectableDurations.length; i++) {
+        durationOptions += '<option>' + selectableDurations[i] + '</option>';
     }
     $(".duration").children("select").append(durationOptions);
 
@@ -51,9 +52,9 @@ $("button#submit").on('click', function(e) {
         'stationName' : $('.form-group.station select option:selected').html(),
         'start' : $('.form-group.datetime input').val(),
         'duration' : $('.form-group.duration select').val(),
-        'description' : $('.form-group.description input').val()
+        'description' : $('.form-group.description input').val(),
+        'usedForTeaching' : $('.checkbox input').is(':checked')
     }
-
 
     if (newSchedule.start === '') {
         window.alert('Please enter a Start time');
@@ -61,6 +62,7 @@ $("button#submit").on('click', function(e) {
         window.alert('Please enter a Title');
     } else {
         // use AJAX to post this to the addschedule service.
+
         $.ajax({
             type: 'POST',
             data: newSchedule,
@@ -69,8 +71,6 @@ $("button#submit").on('click', function(e) {
         }).done(function(res) {
             // check for success (blank response)
             if (res.msg === '') {
-                // clear input fields
-                $('.form-group input').val('');
                 // redirect to home page, where user can view upcoming recordings
                 $(location).attr('href', '/');
             } else {

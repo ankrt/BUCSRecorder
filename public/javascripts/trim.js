@@ -276,7 +276,14 @@ function changeCurrentTime(percentage) {
 
 function toMinutes(n) {
     var totalSeconds = parseInt(Math.round(n));
-    var minutes = Math.floor(totalSeconds / 60);
+    var totalMinutes = Math.floor(totalSeconds / 60);
+
+    var hours = Math.floor(totalMinutes / 60);
+    var minutes = totalMinutes % 60;
     var seconds = totalSeconds % 60;
-    return ('00' + minutes).slice(-2) + ':' + ('00' + seconds).slice(-2);
+    if (hours < 1) {
+        return ('00' + minutes).slice(-2) + ':' + ('00' + seconds).slice(-2);
+    } else {
+        return hours + ':' + ('00' + minutes).slice(-2) + ':' + ('00' + seconds).slice(-2);
+    }
 }
