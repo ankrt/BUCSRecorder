@@ -129,6 +129,7 @@ router.get('/recordings/download/:id.mp3?', function(req, res) {
                 //  - 200 if the full data is sent
                 var stat = len < gs._native.length ? 206 : 200;
                 res.status(stat).set(headers).send(data);
+                incrementDownloadCounter(db, id);
             });
         });
     });
@@ -189,7 +190,7 @@ router.get('/trim/:id', function(req, res) {
     });
 });
 
-desiredRanges = function(header) {
+function desiredRanges(header) {
     var re = /bytes=(\d+)-(\d*)/;
     var ranges = {
         start: 0,
@@ -204,6 +205,19 @@ desiredRanges = function(header) {
     } else {
         return ranges;
     }
+}
+
+function incrementDownloadCounter(db, id) {
+
+    db.collection('archive').update(
+        {'file': ObjectID(id)},
+        {$inc: {'views': 1}},
+        function(err, count, status) {
+            if (err) {
+                console.log('[ERROR. File was downloaded, but could not increment counter]');
+            }
+        }
+    );
 }
 
 module.exports = router;
